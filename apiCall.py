@@ -15,4 +15,7 @@ def getAllTournaments(startDate, endDate, currentPage):
     return requests.post(url=url, json=getAllRequestBody, headers=headers)
 
 def getTournamentData(name):
-    print("Hello world")
+    f = open("Legion Tournament Elos/getTournamentRequestBody.json")
+    getTournamentRequestBody = json.load(f)
+    getTournamentRequestBody["variables"]["slug"] = name
+    return requests.post(url=url, json=getTournamentRequestBody, headers=headers)

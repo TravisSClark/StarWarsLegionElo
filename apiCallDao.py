@@ -12,6 +12,9 @@ def getAllTournaments(startDate, endDate):
         listOfTournaments.extend(getTournamentsFromList(response))
     return listOfTournaments
 
+def getTournamentData(name):
+    return apiCall.getTournamentData(name).json()["data"]["tournament"]["groups"]
+
 def getTournamentsFromList(response):
     minimumPlayerCount = 16
     tournaments = []
@@ -22,3 +25,4 @@ def getTournamentsFromList(response):
     return tournaments
 
 print(getAllTournaments("2022-11-01 12:00:00", "2023-10-08 02:00:00"))
+print(getTournamentData("house-of-cards-store-championship"))
