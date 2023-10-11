@@ -1,19 +1,19 @@
-import apiCall
+import api
 
 def get_all_tournaments(start_date, end_date):
     list_of_tournaments = []
     current_page = 1
-    response = apiCall.get_all_tournaments(start_date, end_date, current_page).json()["data"]["tournaments"]
+    response = api.get_all_tournaments(start_date, end_date, current_page).json()["data"]["tournaments"]
     list_of_tournaments.extend(get_tournament_names(response))
     #lastPage = response["paginatorInfo"]["lastPage"]
     while current_page < 3:
         current_page += 1
-        response = apiCall.get_all_tournaments(start_date, end_date, current_page).json()["data"]["tournaments"]
+        response = api.get_all_tournaments(start_date, end_date, current_page).json()["data"]["tournaments"]
         list_of_tournaments.extend(get_tournament_names(response))
     return list_of_tournaments
 
 def get_tournament_groups(name):
-    return apiCall.getTournamentData(name).json()["data"]["tournament"]["groups"]
+    return api.getTournamentData(name).json()["data"]["tournament"]["groups"]
 
 def get_tournament_names(response):
     minimumPlayerCount = 16
