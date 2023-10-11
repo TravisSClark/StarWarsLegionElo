@@ -16,11 +16,11 @@ def get_tournament_groups(name):
     return api.getTournamentData(name).json()["data"]["tournament"]["groups"]
 
 def get_tournament_names(response):
-    minimumPlayerCount = 16
+    minimum_player_count = 16
     tournaments = []
-    pageTournamentList = response["data"]
-    for tournament in pageTournamentList:
-        if tournament["playerCount"] >= minimumPlayerCount:
+    page_tournament_list = response["data"]
+    for tournament in page_tournament_list:
+        if tournament["playerCount"] >= minimum_player_count:
             tournaments.append(tournament["slug"])
     return tournaments
 
