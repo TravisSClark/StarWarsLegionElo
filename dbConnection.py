@@ -6,7 +6,7 @@ defaultElo = 800
 defaultGames = 0
 
 def create_connection():
-    database = r'D:\Projects\sqlite\db\eloSQLite.db'
+    database = r'sqlite\db\eloSQLite.db'
     conn = None
     
     try:
