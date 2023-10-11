@@ -1,21 +1,21 @@
 import apiCall
 
-def getAllTournaments(startDate, endDate):
-    listOfTournaments = []
-    currentPage = 1
-    response = apiCall.getAllTournaments(startDate, endDate, currentPage).json()["data"]["tournaments"]
-    listOfTournaments.extend(getTournamentsFromList(response))
+def get_all_tournaments(start_date, end_date):
+    list_of_tournaments = []
+    current_page = 1
+    response = apiCall.get_all_tournaments(start_date, end_date, current_page).json()["data"]["tournaments"]
+    list_of_tournaments.extend(get_tournament_names(response))
     #lastPage = response["paginatorInfo"]["lastPage"]
-    while currentPage < 3:
-        currentPage += 1
-        response = apiCall.getAllTournaments(startDate, endDate, currentPage).json()["data"]["tournaments"]
-        listOfTournaments.extend(getTournamentsFromList(response))
-    return listOfTournaments
+    while current_page < 3:
+        current_page += 1
+        response = apiCall.get_all_tournaments(start_date, end_date, current_page).json()["data"]["tournaments"]
+        list_of_tournaments.extend(get_tournament_names(response))
+    return list_of_tournaments
 
-def getTournamentData(name):
+def get_tournament_groups(name):
     return apiCall.getTournamentData(name).json()["data"]["tournament"]["groups"]
 
-def getTournamentsFromList(response):
+def get_tournament_names(response):
     minimumPlayerCount = 16
     tournaments = []
     pageTournamentList = response["data"]
@@ -24,5 +24,5 @@ def getTournamentsFromList(response):
             tournaments.append(tournament["slug"])
     return tournaments
 
-print(getAllTournaments("2022-11-01 12:00:00", "2023-10-08 02:00:00"))
-print(getTournamentData("house-of-cards-store-championship"))
+print(get_all_tournaments("2022-11-01 12:00:00", "2023-10-08 02:00:00"))
+print(get_tournament_groups("house-of-cards-store-championship"))
