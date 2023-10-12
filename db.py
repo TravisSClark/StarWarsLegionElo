@@ -44,7 +44,7 @@ def get_all():
         cur.execute(sql_select_player)
         players = cur.fetchall()
         players.sort(key = lambda i:i[2], reverse = True)
-        players = [dict(zip([c[0] for c in cur.description], player)) for player in players]
+        # players = [dict(zip([c[0] for c in cur.description], player)) for player in players]
         cur.close()
         conn.close()
         return players
@@ -93,14 +93,8 @@ def update_player(id, name, elo):
     else:
         print("Error! Cannot update player.")
     
-# create_table()
-# insert_player(0, "Test")
-    
 def main():
-    create_table()
-#     print(get_player(0))
-#     print(get_all())
-        
+    create_table()  
     
 if __name__ == '__main__':
     main()

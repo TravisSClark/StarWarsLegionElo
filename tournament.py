@@ -2,7 +2,7 @@ import dao
 import db
 import elo
 
-def get_tournament_data(name):
+def update_tournament_data(name):
     groups = dao.get_tournament_groups(name)
     for group in groups:
         for round in group["rounds"]:
@@ -26,7 +26,7 @@ def get_player_info_from_db(player_info):
     return db_player
 
 def main():
-    get_tournament_data("house-of-cards-store-championship")
+    update_tournament_data("house-of-cards-store-championship")
     print(db.get_all())
         
     
