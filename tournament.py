@@ -27,7 +27,7 @@ def get_player_info_from_db(player_info):
 
 def main():
     update_tournament_data("house-of-cards-store-championship")
-    print(db.get_all())
+    print(db.get_all().sort(key = lambda i:i[2], reverse = True))
         
     
 if __name__ == '__main__':
