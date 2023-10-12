@@ -3,7 +3,6 @@ from sqlite3 import Error
 
 tableName = "players"
 defaultElo = 800
-defaultGames = 0
 
 def create_connection():
     database = r'sqlite\db\eloSQLite.db'
@@ -92,11 +91,8 @@ def update_player(id, name, elo):
     
     
 def main():
-    #if player == None:
-    #    insert_player(conn, 3, "Billy")
-    #    player = get_player(conn, 3)
-    players = get_all()
-    print(players)
+    print(get_all())
+    print(get_player(3))
         
     
 if __name__ == '__main__':

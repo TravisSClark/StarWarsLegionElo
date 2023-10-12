@@ -13,7 +13,7 @@ def get_all_tournaments(start_date, end_date):
     return list_of_tournaments
 
 def get_tournament_groups(name):
-    return api.getTournamentData(name).json()["data"]["tournament"]["groups"]
+    return api.get_tournament_data(name).json()["data"]["tournament"]["groups"]
 
 def get_tournament_names(response):
     minimum_player_count = 16
@@ -24,5 +24,10 @@ def get_tournament_names(response):
             tournaments.append(tournament["slug"])
     return tournaments
 
-print(get_all_tournaments("2022-11-01 12:00:00", "2023-10-08 02:00:00"))
-print(get_tournament_groups("house-of-cards-store-championship"))
+# def main():
+#     print(get_all_tournaments("2022-11-01 12:00:00", "2023-10-08 02:00:00"))
+#     print(get_tournament_groups("house-of-cards-store-championship"))
+        
+    
+# if __name__ == '__main__':
+#     main()
