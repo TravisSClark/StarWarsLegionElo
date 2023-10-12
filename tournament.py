@@ -1,9 +1,9 @@
-import dao
+import service
 import db
 import elo
 
 def update_tournament_data(name):
-    groups = dao.get_tournament_groups(name)
+    groups = service.get_tournament_groups(name)
     for group in groups:
         for round in group["rounds"]:
             for match in round["matches"]:

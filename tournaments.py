@@ -1,9 +1,9 @@
 import db
-import dao
+import service
 import tournament
 
 def update_recent_elos(start_date, end_date):
-    tournaments = dao.get_all_tournaments(start_date, end_date)
+    tournaments = service.get_all_tournaments(start_date, end_date)
     for tournament_name in tournaments:
         tournament.update_tournament_data(tournament_name)
         

@@ -43,7 +43,6 @@ def get_all():
         cur = conn.cursor()
         cur.execute(sql_select_player)
         players = cur.fetchall()
-        # players = [dict(zip([c[0] for c in cur.description], player)) for player in players]
         cur.close()
         conn.close()
         return players
