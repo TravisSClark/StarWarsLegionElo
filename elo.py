@@ -6,16 +6,18 @@ startingElo = 800
 K = 30
 
 def probability(rating1, rating2):
-    return 1.0 * 1.0 / (1 + 1.0 * math.pow(10, 1.0 * (rating1 - rating2) / 400))
+    return 1 * 1/ (1 + 1 * math.pow(10, 1 * (rating1 - rating2) / 400))
 
-def elo_rating(Ra, Rb, d):
-    Pb = probability(Ra, Rb)
-    Pa = 1 - Pb
+# player_one_winner is a boolean
+def elo_rating(player_one_elo, player_two_elo, player_one_winner):
+    prob_two = probability(player_one_elo, player_two_elo)
+    prob_one = 1 - prob_two
  
-    Ra = update_elo(Ra, Pa, d)
-    Rb = update_elo(Rb, Pb, not d)
+    player_one_elo = update_elo(player_one_elo, prob_one, player_one_winner)
+    player_two_elo = update_elo(player_two_elo, prob_two, not player_one_winner)
+    return player_one_elo, player_two_elo
 
 def update_elo(rating, expected, d):
     actual = 1 if d else 0
     
-    return rating + K * (actual - expected)
+    return round(rating + K * (actual - expected))

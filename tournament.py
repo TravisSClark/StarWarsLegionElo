@@ -1,24 +1,34 @@
 import dao
 import db
-
-class Person:
-  def __init__(self, id, name, elo):
-    self.id = id
-    self.name = name
-    self.elo = elo
+import elo
 
 def get_tournament_data(name):
     groups = dao.get_tournament_groups(name)
     for group in groups:
-        players = []
-        for player in group["players"]:
-            player_info= player["user"]
-            players.append(get_player_info(player_info))
+        for round in group["rounds"]:
+            for match in round["matches"]:
+                if not match["isBye"]:
+                    player_one = get_player_info_from_db(match["playerOne"]["user"])
+                    player_two = get_player_info_from_db(match["playerTwo"]["user"])
+                    winner = match["winner"]["user"]
+                    player_one_winner = player_one["id"] == int(winner["id"])
+                    player_one["elo"], player_two["elo"] = elo.elo_rating(player_one["elo"], player_two["elo"], player_one_winner)
+                    db.update_player(player_one["id"], player_one["name"], player_one["elo"])
+                    db.update_player(player_two["id"], player_two["name"], player_two["elo"])
+                
 
-def get_player_info(player_info):
+def get_player_info_from_db(player_info):
     db_player = db.get_player(int(player_info["id"]))
-    #db_player = db.get_player(3)
+    #db_player = db.get_player(0)
     if db_player == None:
-        return Person(player_info["id"], player_info["name"], db.defaultElo)
-    else:
-        return Person(*db_player)
+        db.insert_player(player_info["id"], player_info["name"])
+        db_player = db.get_player(int(player_info["id"]))    
+    return db_player
+
+def main():
+    get_tournament_data("house-of-cards-store-championship")
+    print(db.get_all())
+        
+    
+if __name__ == '__main__':
+    main()
