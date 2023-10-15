@@ -5,30 +5,39 @@ import elo
 def update_tournament_data(name):
     groups = service.get_tournament_groups(name)
     for group in groups:
+        player_list, player_id_elo_dict = get_player_info_from_db(group["players"])
         for round in group["rounds"]:
             for match in round["matches"]:
                 if not match["isBye"]:
-                    player_one = get_player_info_from_db(match["playerOne"]["user"])
-                    player_two = get_player_info_from_db(match["playerTwo"]["user"])
-                    winner = match["winner"]["user"]
-                    player_one_winner = player_one["id"] == int(winner["id"])
-                    player_one["elo"], player_two["elo"] = elo.elo_rating(player_one["elo"], player_two["elo"], player_one_winner)
-                    db.update_player(player_one["id"], player_one["name"], player_one["elo"])
-                    db.update_player(player_two["id"], player_two["name"], player_two["elo"])
+                    player_one_id = int(match["playerOne"]["user"]["id"])
+                    player_two_id = int(match["playerTwo"]["user"]["id"])
+                    winner_id = int(match["winner"]["user"]["id"])
+                    player_one_winner = player_one_id == winner_id
+                    player_id_elo_dict[player_one_id], player_id_elo_dict[player_two_id] = elo.elo_rating(
+                        player_id_elo_dict[player_one_id], player_id_elo_dict[player_two_id], player_one_winner)
+        for player in player_list:
+            player["elo"] = player_id_elo_dict[player["id"]]
+            db.update_player(player["id"], player["name"], player["elo"])
                 
 
-def get_player_info_from_db(player_info):
-    db_player = db.get_player(int(player_info["id"]))
-    #db_player = db.get_player(0)
-    if db_player == None:
-        db.insert_player(player_info["id"], player_info["name"])
-        db_player = db.get_player(int(player_info["id"]))    
-    return db_player
+def get_player_info_from_db(players):
+    player_list = []
+    player_id_elo_dict = {}
+    for player in players:
+        db_player = db.get_player(int(player["user"]["id"])) or {}
+        if not db_player:
+            db.insert_player(player["user"]["id"], player["user"]["name"])
+            db_player["id"] = player["user"]["id"]
+            db_player["elo"] = db.defaultElo
+        db_player["name"] = player["user"]["name"]
+        player_list.append(db_player)
+        player_id_elo_dict[db_player["id"]] = db_player["elo"]
+    return player_list, player_id_elo_dict
+        
 
 def main():
     update_tournament_data("house-of-cards-store-championship")
-    print(db.get_all().sort(key = lambda i:i[2], reverse = True))
-        
+    print(sorted(db.get_all(), key=lambda i: i[2], reverse=True))
     
 if __name__ == '__main__':
     main()
