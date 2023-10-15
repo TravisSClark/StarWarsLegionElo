@@ -5,7 +5,7 @@ tableName = "players"
 defaultElo = 800
 
 def create_connection():
-    database = r'sqlite\db\eloSQLite.db'
+    database = r'..\sqlite\db\eloSQLite.db'
     conn = None
     
     try:

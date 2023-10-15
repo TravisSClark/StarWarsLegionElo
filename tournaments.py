@@ -9,7 +9,7 @@ def update_recent_elos(start_date, end_date):
         
 def main():
     update_recent_elos("2022-11-01 12:00:00", "2022-11-17 02:00:00")
-    print(db.get_all())
+    print(sorted(db.get_all(), key=lambda i: i[2], reverse=True))
 
 if __name__ == '__main__':
     main()
