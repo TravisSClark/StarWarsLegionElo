@@ -64,6 +64,20 @@ def get_player(id):
         return player
     else:
         print("Error! Cannot get player.")
+        
+def get_players(id_list):
+    conn = create_connection()
+    
+    if conn is not None:
+        sql_select_player = f"SELECT * FROM {tableName} WHERE id IN {id_list}"
+        cur = conn.cursor()
+        cur.execute(sql_select_player)
+        players = cur.fetchall()
+        cur.close()
+        conn.close()
+        return players
+    else:
+        print("Error! Cannot get player.")
 
 def insert_player(id, name):
     conn = create_connection()
@@ -92,7 +106,7 @@ def update_player(id, name, elo):
         print("Error! Cannot update player.")
     
 def main():
-    create_table()  
+    create_table()
     
 if __name__ == '__main__':
     main()
