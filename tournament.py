@@ -1,6 +1,7 @@
-import service
+# import
 import db
 import elo
+import service
 
 def update_tournament_data(name):
     groups = service.get_tournament_groups(name)

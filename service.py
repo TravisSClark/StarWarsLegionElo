@@ -1,4 +1,8 @@
+# external
+from datetime import datetime
+# internal
 import api
+
 
 def get_all_tournaments(start_date, end_date):
     list_of_tournaments = []
@@ -14,10 +18,11 @@ def get_all_tournaments(start_date, end_date):
 
 def get_tournament_names(response):
     minimum_player_count = 16
+    date_format = '%Y-%m-%d %H:%M:%S'
     tournaments = []
     page_tournament_list = response["data"]
     for tournament in page_tournament_list:
-        if tournament["playerCount"] >= minimum_player_count:
+        if tournament["playerCount"] >= minimum_player_count and datetime.strptime(tournament["endsAt"], date_format) < datetime.now():
             tournaments.append(tournament["slug"])
     return tournaments
 
