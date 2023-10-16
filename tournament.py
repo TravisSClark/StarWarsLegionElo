@@ -1,4 +1,7 @@
-# import
+# external
+from pprint import pprint
+
+# internal
 import db
 import elo
 import service
@@ -14,13 +17,19 @@ def update_tournament_data(name):
                     player_two_id = int(match["playerTwo"]["user"]["id"])
                     winner_id = int(match["winner"]["user"]["id"])
                     player_one_winner = player_one_id == winner_id
-                    
                     player_id_elo_dict[player_one_id], player_id_elo_dict[player_two_id] = elo.elo_rating(
                         player_id_elo_dict[player_one_id], player_id_elo_dict[player_two_id], player_one_winner)
         for player in player_list:
             player["elo"] = player_id_elo_dict[player["id"]]
             db.update_player(player["id"], player["name"], player["elo"])
                 
+def get_elo_of_tournament_players(name):
+    groups = service.get_tournament_groups(name)
+    total_player_list = []
+    for group in groups:
+        player_list, _ = get_player_list(group["groupPlayerResults"])
+        total_player_list.extend(player_list)
+    return total_player_list
 
 def get_player_list(players):
     player_list = []
@@ -41,8 +50,10 @@ def get_player_info_from_db(player):
     return db_player    
 
 def main():
-    update_tournament_data("las-vegas-open-grand-championship")
-    print(sorted(db.get_all(), key=lambda i: i[2], reverse=True))
+    # update_tournament_data("las-vegas-open-grand-championship")
+    player_list = get_elo_of_tournament_players("atomic-empire-star-wars-legion-tournament-darkness-descends")
+    sorted_player_list = sorted(player_list, key=lambda i: i["elo"], reverse=True)
+    pprint(sorted_player_list)
     
 if __name__ == '__main__':
     main()
