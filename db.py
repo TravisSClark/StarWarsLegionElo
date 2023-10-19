@@ -24,7 +24,20 @@ def create_table():
         sql_create_players_table = f""" CREATE TABLE {tableName} (
                                             id integer PRIMARY KEY,
                                             name text NOT NULL,
-                                            elo integer DEFAULT {defaultElo}
+                                            elo integer DEFAULT {defaultElo},
+                                            games integer DEFAULT 0,
+                                            wins integer DEFAULT 0,
+                                            loses integer DEFAULT 0,
+                                            empire_wins integar DEFAULT 0,
+                                            empire_loses integar DEFAULT 0,
+                                            rebels_wins integar DEFAULT 0,
+                                            rebels_loses integar DEFAULT 0,
+                                            republic_wins integar DEFAULT 0,
+                                            republic_loses integar DEFAULT 0,
+                                            separatists_wins integar DEFAULT 0,
+                                            separatists_loses integar DEFAULT 0,
+                                            mercenary_wins integar DEFAULT 0,
+                                            mercenary_loses integar DEFAULT 0
                                         ); """
         try:
             cur = conn.cursor()
@@ -79,13 +92,19 @@ def insert_player(id, name):
     else:
         print("Error! Cannot insert new player.")
     
-def update_player(id, name, elo):
+def update_player(player):
     conn = create_connection()
     
     if conn is not None:
-        sql_update_player = f" UPDATE {tableName} SET name = ? , elo = ? WHERE id = ?"
+        sql_update_player = f""" UPDATE {tableName} SET name = ? , elo = ? , games = ? , wins = ? , loses = ? , 
+        empire_wins = ? , empire_loses = ? , rebels_wins = ? , rebels_loses = ? , 
+        republic_wins = ? , republic_loses = ? , separatists_wins = ? , separatists_loses = ? , mercenary_wins = ? , mercenary_loses = ? 
+        WHERE id = ?"""
         cur = conn.cursor()
-        cur.execute(sql_update_player, (name, elo, id))
+        cur.execute(sql_update_player, (player["name"], player["elo"], player["games"], player["wins"], player["loses"],
+                                        player["empire_wins"], player["empire_loses"], player["rebels_wins"], player["rebels_loses"],
+                                        player["republic_wins"], player["republic_loses"], player["separatists_wins"], player["separatists_loses"],
+                                        player["mercenary_wins"], player["mercenary_loses"],player["id"]))
         conn.commit()
         cur.close()
         conn.close()

@@ -21,7 +21,7 @@ def update_tournament_data(name):
                         player_id_elo_dict[player_one_id], player_id_elo_dict[player_two_id], player_one_winner)
         for player in player_list:
             player["elo"] = player_id_elo_dict[player["id"]]
-            db.update_player(player["id"], player["name"], player["elo"])
+            db.update_player(player)
                 
 def get_elo_of_tournament_players(name):
     groups = service.get_tournament_groups(name)
@@ -36,8 +36,10 @@ def get_player_list(players):
     player_id_elo_dict = {}
     for player in players:
         db_player = get_player_info_from_db(player["player"])
-        player_list.append(db_player)
-        player_id_elo_dict[db_player["id"]] = db_player["elo"]
+        updated_player = get_game_results(db_player, player)
+        player_list.append(updated_player)
+        player_id_elo_dict[updated_player["id"]] = updated_player["elo"]
+    
     return player_list, player_id_elo_dict
 
 def get_player_info_from_db(player):
@@ -45,15 +47,56 @@ def get_player_info_from_db(player):
     if not db_player:
         db.insert_player(player["user"]["id"], player["user"]["name"])
         db_player["id"] = int(player["user"]["id"])
-        db_player["elo"] = db.defaultElo
+        db_player = set_default_player(db_player)
     db_player["name"] = player["user"]["name"]
-    return db_player    
+    return db_player
+
+def set_default_player(db_player):
+    db_player["elo"] = db.defaultElo
+    db_player["games"] = 0
+    db_player["wins"] = 0
+    db_player["loses"] = 0
+    db_player["empire_wins"] = 0
+    db_player["empire_loses"] = 0
+    db_player["rebels_wins"] = 0
+    db_player["rebels_loses"] = 0
+    db_player["republic_wins"] = 0
+    db_player["republic_loses"] = 0
+    db_player["separatists_wins"] = 0
+    db_player["separatists_loses"] = 0
+    db_player["mercenary_wins"] = 0
+    db_player["mercenary_loses"] = 0
+    return db_player
+    
+def get_game_results(db_player, player):
+    db_player["games"] += player["wonMatchesAmount"] + player["lostMatchesAmount"]
+    db_player["wins"] += player["wonMatchesAmount"]
+    db_player["loses"] += player["lostMatchesAmount"]
+    if player["player"]["legionList"]:
+        match player["player"]["legionList"]["faction"]:
+            case "EMPIRE":
+                db_player["empire_wins"] += player["wonMatchesAmount"]
+                db_player["empire_loses"] += player["lostMatchesAmount"]
+            case "REBELS":
+                db_player["rebels_wins"] += player["wonMatchesAmount"]
+                db_player["rebels_loses"] += player["lostMatchesAmount"]
+            case "REPUBLIC":
+                db_player["republic_wins"] += player["wonMatchesAmount"]
+                db_player["republic_loses"] += player["lostMatchesAmount"]
+            case "SEPARATISTS":
+                db_player["separatists_wins"] += player["wonMatchesAmount"]
+                db_player["separatists_loses"] += player["lostMatchesAmount"]
+            case "MERCENARY":
+                db_player["mercenary_wins"] += player["wonMatchesAmount"]
+                db_player["mercenary_loses"] += player["lostMatchesAmount"]
+    return db_player
 
 def main():
     # update_tournament_data("las-vegas-open-grand-championship")
+    update_tournament_data("atomic-empire-star-wars-legion-tournament-darkness-descends")
     player_list = get_elo_of_tournament_players("atomic-empire-star-wars-legion-tournament-darkness-descends")
     sorted_player_list = sorted(player_list, key=lambda i: i["elo"], reverse=True)
-    pprint(sorted_player_list)
+    print(sorted_player_list)
     
 if __name__ == '__main__':
     main()
