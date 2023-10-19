@@ -40,7 +40,7 @@ def get_all():
     conn = create_connection()
     
     if conn is not None:
-        sql_select_player = f"SELECT * FROM {tableName}"
+        sql_select_player = f"SELECT ROW_NUMBER () OVER ( ORDER BY elo DESC ) RowNum, name, elo FROM {tableName}"
         cur = conn.cursor()
         cur.execute(sql_select_player)
         players = cur.fetchall()
