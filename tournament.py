@@ -6,6 +6,14 @@ import db
 import elo
 import service
 
+def get_elo_of_tournament_players(name):
+    groups = service.get_tournament_groups(name)
+    total_player_list = []
+    for group in groups:
+        player_list, _ = get_player_list(group["groupPlayerResults"])
+        total_player_list.extend(player_list)
+    return total_player_list
+
 def update_tournament_data(name):
     groups = service.get_tournament_groups(name)
     for group in groups:
@@ -22,14 +30,6 @@ def update_tournament_data(name):
         for player in player_list:
             player["elo"] = player_id_elo_dict[player["id"]]
             db.update_player(player)
-                
-def get_elo_of_tournament_players(name):
-    groups = service.get_tournament_groups(name)
-    total_player_list = []
-    for group in groups:
-        player_list, _ = get_player_list(group["groupPlayerResults"])
-        total_player_list.extend(player_list)
-    return total_player_list
 
 def get_player_list(players):
     player_list = []
@@ -93,7 +93,7 @@ def get_game_results(db_player, player):
 
 def main():
     # update_tournament_data("las-vegas-open-grand-championship")
-    update_tournament_data("atomic-empire-star-wars-legion-tournament-darkness-descends")
+    # update_tournament_data("atomic-empire-star-wars-legion-tournament-darkness-descends")
     player_list = get_elo_of_tournament_players("atomic-empire-star-wars-legion-tournament-darkness-descends")
     sorted_player_list = sorted(player_list, key=lambda i: i["elo"], reverse=True)
     print(sorted_player_list)
