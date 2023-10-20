@@ -53,10 +53,14 @@ def get_all():
     conn = create_connection()
     
     if conn is not None:
-        sql_select_player = f"SELECT ROW_NUMBER () OVER ( ORDER BY elo DESC ) RowNum, name, elo FROM {tableName}"
+        sql_select_player = f"""SELECT ROW_NUMBER () OVER ( ORDER BY elo DESC ) RowNum, name, elo, games, wins, loses, 
+        empire_wins, empire_loses, rebels_wins, rebels_loses, republic_wins, republic_loses, separatists_wins, separatists_loses, 
+        mercenary_wins, mercenary_loses FROM {tableName}"""
         cur = conn.cursor()
         cur.execute(sql_select_player)
-        players = cur.fetchall()
+        columns = cur.description 
+        players = [{columns[index][0]:column for index, column in enumerate(value)} for value in cur.fetchall()]
+
         cur.close()
         conn.close()
         return players
