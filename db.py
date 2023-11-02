@@ -50,10 +50,13 @@ def create_table():
         print("Error! Cannot create table.")
         
 def get_all():
+    return get_all_sorted("elo")
+    
+def get_all_sorted(sort_column):
     conn = create_connection()
     
     if conn is not None:
-        sql_select_player = f"""SELECT ROW_NUMBER () OVER ( ORDER BY elo DESC ) RowNum, name, elo, games, wins, loses, 
+        sql_select_player = f"""SELECT ROW_NUMBER () OVER ( ORDER BY {sort_column} DESC, elo DESC ) RowNum, name, elo, games, wins, loses, 
         empire_wins, empire_loses, rebels_wins, rebels_loses, republic_wins, republic_loses, separatists_wins, separatists_loses, 
         mercenary_wins, mercenary_loses FROM {tableName}"""
         cur = conn.cursor()
