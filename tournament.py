@@ -1,5 +1,7 @@
 # external
-from pprint import pprint
+import json
+import cProfile
+import re
 
 # internal
 import db
@@ -16,20 +18,26 @@ def get_elo_of_tournament_players(name):
 
 def update_tournament_data(name):
     groups = service.get_tournament_groups(name)
-    for group in groups:
-        player_list, player_id_elo_dict = get_player_list(group["groupPlayerResults"])
-        for round in group["rounds"]:
-            for match in round["matches"]:
-                if not match["isBye"] and match["winner"]:
-                    player_one_id = int(match["playerOne"]["user"]["id"])
-                    player_two_id = int(match["playerTwo"]["user"]["id"])
-                    winner_id = int(match["winner"]["user"]["id"])
-                    player_one_winner = player_one_id == winner_id
-                    player_id_elo_dict[player_one_id], player_id_elo_dict[player_two_id] = elo.elo_rating(
-                        player_id_elo_dict[player_one_id], player_id_elo_dict[player_two_id], player_one_winner)
-        for player in player_list:
-            player["elo"] = player_id_elo_dict[player["id"]]
-            db.update_player(player)
+    if groups:
+        for group in groups:
+            player_list, player_id_elo_dict = get_player_list(group["groupPlayerResults"])
+            for round in group["rounds"]:
+                for match in round["matches"]:
+                    if not match["isBye"] and match["winner"]:
+                        player_one_id = int(match["playerOne"]["user"]["id"])
+                        player_two_id = int(match["playerTwo"]["user"]["id"])
+                        winner_id = int(match["winner"]["user"]["id"])
+                        player_one_winner = player_one_id == winner_id
+                        player_id_elo_dict[player_one_id], player_id_elo_dict[player_two_id] = elo.elo_rating(
+                            player_id_elo_dict[player_one_id], player_id_elo_dict[player_two_id], player_one_winner)
+            for player in player_list:
+                player["elo"] = player_id_elo_dict[player["id"]]
+                tournament_list = json.loads(player["tournaments"])
+                if name not in tournament_list:
+                    tournament_list.append(name)
+                player["tournaments"] = json.dumps(tournament_list)
+                # This costs too much
+                db.update_player(player)
 
 def get_player_list(players):
     player_list = []
@@ -66,6 +74,7 @@ def set_default_player(db_player):
     db_player["separatists_loses"] = 0
     db_player["mercenary_wins"] = 0
     db_player["mercenary_loses"] = 0
+    db_player["tournaments"] = "[]"
     return db_player
     
 def get_game_results(db_player, player):
@@ -92,11 +101,11 @@ def get_game_results(db_player, player):
     return db_player
 
 def main():
-    # update_tournament_data("las-vegas-open-grand-championship")
+    update_tournament_data("las-vegas-open-grand-championship")
     # update_tournament_data("atomic-empire-star-wars-legion-tournament-darkness-descends")
-    player_list = get_elo_of_tournament_players("atomic-empire-star-wars-legion-tournament-darkness-descends")
+    player_list = get_elo_of_tournament_players("las-vegas-open-grand-championship")
     sorted_player_list = sorted(player_list, key=lambda i: i["elo"], reverse=True)
     print(sorted_player_list)
     
 if __name__ == '__main__':
-    main()
+    cProfile.run('main()')

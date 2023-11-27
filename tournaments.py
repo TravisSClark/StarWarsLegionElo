@@ -12,8 +12,8 @@ def update_recent_elos(start_date, end_date):
         tournament.update_tournament_data(tournament_name)
         
 def main():
-    # update_recent_elos("2022-11-01 12:00:00", "2023-10-30 01:00:00")
-    players = db.get_all_sorted("elo")
+    update_recent_elos("2022-11-01 12:00:00", "2023-11-20 01:00:00")
+    players = db.get_all()
     with open("getAll.json", "w", encoding='utf8') as file:
         file.write("[\n")
         for player in players:

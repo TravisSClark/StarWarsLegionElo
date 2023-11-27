@@ -19,4 +19,10 @@ def get_tournament_data(name):
     f = open("getTournamentRequestBody.json")
     get_tournament_request_body = json.load(f)
     get_tournament_request_body["variables"]["slug"] = name
-    return requests.post(url=url, json=get_tournament_request_body, headers=headers)
+    attempts = 0
+    while attempts < 3:
+        response = requests.post(url=url, json=get_tournament_request_body, headers=headers)
+        if response.status_code == 200:
+            return response
+        else:
+            attempts += 1

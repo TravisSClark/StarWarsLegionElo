@@ -37,7 +37,8 @@ def create_table():
                                             separatists_wins integar DEFAULT 0,
                                             separatists_loses integar DEFAULT 0,
                                             mercenary_wins integar DEFAULT 0,
-                                            mercenary_loses integar DEFAULT 0
+                                            mercenary_loses integar DEFAULT 0,
+                                            tournaments text DEFAULT '[]'
                                         ); """
         try:
             cur = conn.cursor()
@@ -58,7 +59,7 @@ def get_all_sorted(sort_column):
     if conn is not None:
         sql_select_player = f"""SELECT ROW_NUMBER () OVER ( ORDER BY {sort_column} DESC, elo DESC ) RowNum, name, elo, games, wins, loses, 
         empire_wins, empire_loses, rebels_wins, rebels_loses, republic_wins, republic_loses, separatists_wins, separatists_loses, 
-        mercenary_wins, mercenary_loses FROM {tableName}"""
+        mercenary_wins, mercenary_loses, tournaments FROM {tableName}"""
         cur = conn.cursor()
         cur.execute(sql_select_player)
         columns = cur.description 
@@ -105,13 +106,13 @@ def update_player(player):
     if conn is not None:
         sql_update_player = f""" UPDATE {tableName} SET name = ? , elo = ? , games = ? , wins = ? , loses = ? , 
         empire_wins = ? , empire_loses = ? , rebels_wins = ? , rebels_loses = ? , 
-        republic_wins = ? , republic_loses = ? , separatists_wins = ? , separatists_loses = ? , mercenary_wins = ? , mercenary_loses = ? 
+        republic_wins = ? , republic_loses = ? , separatists_wins = ? , separatists_loses = ? , mercenary_wins = ? , mercenary_loses = ? , tournaments = ? 
         WHERE id = ?"""
         cur = conn.cursor()
         cur.execute(sql_update_player, (player["name"], player["elo"], player["games"], player["wins"], player["loses"],
                                         player["empire_wins"], player["empire_loses"], player["rebels_wins"], player["rebels_loses"],
                                         player["republic_wins"], player["republic_loses"], player["separatists_wins"], player["separatists_loses"],
-                                        player["mercenary_wins"], player["mercenary_loses"],player["id"]))
+                                        player["mercenary_wins"], player["mercenary_loses"], player["tournaments"], player["id"]))
         conn.commit()
         cur.close()
         conn.close()
