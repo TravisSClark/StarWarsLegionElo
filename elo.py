@@ -15,6 +15,10 @@ def elo_rating(player_one_elo, player_two_elo, player_one_winner):
     player_two_elo = update_elo(player_two_elo, prob_two, not player_one_winner)
     return player_one_elo, player_two_elo
 
+def weighted_elo_rating(weighted_player_one_elo, weighted_player_two_elo, player_one_winner):
+    weighted_player_one_elo, weighted_player_two_elo = elo_rating(weighted_player_one_elo, weighted_player_two_elo, player_one_winner)
+    return weighted_player_one_elo + K, weighted_player_two_elo + K
+
 def probability(rating1, rating2):
     return 1 * 1/ (1 + 1 * math.pow(10, 1 * (rating1 - rating2) / 400))
 

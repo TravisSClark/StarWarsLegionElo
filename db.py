@@ -25,6 +25,7 @@ def create_table():
                                             id integer PRIMARY KEY,
                                             name text NOT NULL,
                                             elo integer DEFAULT {defaultElo},
+                                            weighted_elo integer DEFAULT {defaultElo},
                                             games integer DEFAULT 0,
                                             wins integer DEFAULT 0,
                                             loses integer DEFAULT 0,
@@ -57,7 +58,7 @@ def get_all_sorted(sort_column):
     conn = create_connection()
     
     if conn is not None:
-        sql_select_player = f"""SELECT ROW_NUMBER () OVER ( ORDER BY {sort_column} DESC, elo DESC ) RowNum, name, elo, games, wins, loses, 
+        sql_select_player = f"""SELECT ROW_NUMBER () OVER ( ORDER BY {sort_column} DESC, elo DESC ) RowNum, name, elo, weighted_elo, games, wins, loses, 
         empire_wins, empire_loses, rebels_wins, rebels_loses, republic_wins, republic_loses, separatists_wins, separatists_loses, 
         mercenary_wins, mercenary_loses, tournaments FROM {tableName}"""
         cur = conn.cursor()
@@ -104,12 +105,12 @@ def update_player(player):
     conn = create_connection()
     
     if conn is not None:
-        sql_update_player = f""" UPDATE {tableName} SET name = ? , elo = ? , games = ? , wins = ? , loses = ? , 
+        sql_update_player = f""" UPDATE {tableName} SET name = ? , elo = ? , weighted_elo = ? ,games = ? , wins = ? , loses = ? , 
         empire_wins = ? , empire_loses = ? , rebels_wins = ? , rebels_loses = ? , 
         republic_wins = ? , republic_loses = ? , separatists_wins = ? , separatists_loses = ? , mercenary_wins = ? , mercenary_loses = ? , tournaments = ? 
         WHERE id = ?"""
         cur = conn.cursor()
-        cur.execute(sql_update_player, (player["name"], player["elo"], player["games"], player["wins"], player["loses"],
+        cur.execute(sql_update_player, (player["name"], player["elo"], player["weighted_elo"], player["games"], player["wins"], player["loses"],
                                         player["empire_wins"], player["empire_loses"], player["rebels_wins"], player["rebels_loses"],
                                         player["republic_wins"], player["republic_loses"], player["separatists_wins"], player["separatists_loses"],
                                         player["mercenary_wins"], player["mercenary_loses"], player["tournaments"], player["id"]))
