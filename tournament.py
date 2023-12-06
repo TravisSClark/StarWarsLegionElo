@@ -16,7 +16,7 @@ def get_elo_of_tournament_players(name):
         total_player_list.extend(player_list)
     return total_player_list
 
-def calculate_not_match_faction_win_rate(name):
+def calculate_faction_win_rate(name, include_mirrored):
     empire_wins = 0
     empire_loses = 0
     rebels_wins = 0
@@ -41,19 +41,20 @@ def calculate_not_match_faction_win_rate(name):
                     if not match["isBye"] and match["winner"]:
                         winner_id = int(match["winner"]["id"])
                         loser_id = int(match["loser"]["id"])
-                        if (player_id_faction_dict[winner_id] != player_id_faction_dict[loser_id]):
-                            match player_id_faction_dict[winner_id]:
-                                case "EMPIRE": empire_wins += 1
-                                case "REBELS": rebels_wins += 1
-                                case "REPUBLIC": republic_wins += 1
-                                case "SEPARATISTS": separatists_wins += 1
-                                case "MERCENARY": mercenary_wins += 1
-                            match player_id_faction_dict[loser_id]:
-                                case "EMPIRE": empire_loses += 1
-                                case "REBELS": rebels_loses += 1
-                                case "REPUBLIC": republic_loses += 1
-                                case "SEPARATISTS": separatists_loses += 1
-                                case "MERCENARY": mercenary_loses += 1
+                        if winner_id in player_id_faction_dict and loser_id in player_id_faction_dict:
+                            if include_mirrored or player_id_faction_dict[winner_id] != player_id_faction_dict[loser_id]:
+                                match player_id_faction_dict[winner_id]:
+                                    case "EMPIRE": empire_wins += 1
+                                    case "REBELS": rebels_wins += 1
+                                    case "REPUBLIC": republic_wins += 1
+                                    case "SEPARATISTS": separatists_wins += 1
+                                    case "MERCENARY": mercenary_wins += 1
+                                match player_id_faction_dict[loser_id]:
+                                    case "EMPIRE": empire_loses += 1
+                                    case "REBELS": rebels_loses += 1
+                                    case "REPUBLIC": republic_loses += 1
+                                    case "SEPARATISTS": separatists_loses += 1
+                                    case "MERCENARY": mercenary_loses += 1
                             
     empire_win_rate = 100 * empire_wins / (empire_wins + empire_loses)
     rebels_win_rate = 100 * rebels_wins / (rebels_wins + rebels_loses)
@@ -159,7 +160,11 @@ def main():
     # player_list = get_elo_of_tournament_players("star-wars-legion-wq-at-pax-unplugged-2023")
     # sorted_player_list = sorted(player_list, key=lambda i: i["weighted_elo"], reverse=True)
     # print(sorted_player_list)
-    calculate_not_match_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023")
+    
+    print("Win Rate: ")
+    calculate_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023", True)
+    print("Non-Mirrored Win Rate: ")
+    calculate_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023", False)
     
 if __name__ == '__main__':
     # cProfile.run('main()')
