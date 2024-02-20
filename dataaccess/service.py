@@ -1,7 +1,7 @@
 # external
 from datetime import datetime
 # internal
-import api
+import data.api as api
 
 
 def get_all_tournaments(start_date, end_date):

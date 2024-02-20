@@ -1,6 +1,6 @@
 # internal
-import db
-import service
+import data.db as db
+import dataaccess.service as service
 import tournament
 
 # external

@@ -4,10 +4,10 @@ import cProfile
 import re
 
 # internal
-import db
+import data.db as db
 import util.elo as elo
-import service
-import api
+import dataaccess.service as service
+import data.api as api
 
 def get_elo_of_tournament_players(name, groups):
     if groups is None:
