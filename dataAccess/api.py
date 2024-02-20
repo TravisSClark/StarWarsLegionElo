@@ -16,19 +16,19 @@ def get_all_tournaments(start_date, end_date, current_page):
     return requests.post(url=url, json=get_all_request_body, headers=headers)
 
 def get_tournament_data(name):
-    f = open("resources/request/getTournamentRequestBody.json")
+    f = open("data/request/getTournamentRequestBody.json")
     get_tournament_request_body = json.load(f)
     get_tournament_request_body["variables"]["slug"] = name
     attempts = 0
     while attempts < 3:
         response = requests.post(url=url, json=get_tournament_request_body, headers=headers)
         if response.status_code == 200:
-            return response
+            return response.json()["data"]["tournament"]["groups"]
         else:
             attempts += 1
             
 def get_tournament_lists(player_id_list):
-    f = open("resources/request/getListsRequestBody.json")
+    f = open("data/request/getListsRequestBody.json")
     get_lists_request_body = json.load(f)
     get_lists_request_body["variables"]["playerIds"] = player_id_list
     return requests.post(url=url, json=get_lists_request_body, headers=headers)

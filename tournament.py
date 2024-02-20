@@ -1,17 +1,14 @@
 # external
 import json
-import cProfile
-import re
 
 # internal
-import data.db as db
+import dataAccess.api as api
+import dataAccess.db as db
 import util.elo as elo
-import dataaccess.service as service
-import data.api as api
 
 def get_elo_of_tournament_players(name, groups):
     if groups is None:
-        groups = service.get_tournament_groups(name)
+        groups = api.get_tournament_data(name)
     total_player_list = []
     for group in groups:
         player_list, _, _ = get_tournament_player_list(group["groupPlayerResults"])
@@ -27,7 +24,7 @@ def calculate_faction_win_rate(name, include_mirrored, groups):
     player_id_faction_dict = {}
     
     if groups is None:
-        groups = service.get_tournament_groups(name)
+        groups = api.get_tournament_data(name)
     if groups:
         for group in groups:
             players = group["players"]
@@ -96,7 +93,7 @@ def tournament_lists_analysis(name):
     print(objective_card_dict, deployment_card_dict, condition_card_dict)
 
 def get_tournament_lists(name):
-    groups = service.get_tournament_groups(name)
+    groups = api.get_tournament_data(name)
     player_id_list = []
     for group in groups:
         for player in group["players"]:
@@ -106,7 +103,7 @@ def get_tournament_lists(name):
     return api_list_data.json()["data"]["legionLists"]
 
 def update_tournament_data(name):
-    groups = service.get_tournament_groups(name)
+    groups = api.get_tournament_data(name)
     if groups:
         for group in groups:
             player_list, player_id_elo_dict, player_id_weighted_elo_dict = get_tournament_player_list(group["groupPlayerResults"])
@@ -201,5 +198,4 @@ def main():
     tournament_lists_analysis("star-wars-legion-wq-at-pax-unplugged-2023")
     
 if __name__ == '__main__':
-    # cProfile.run('main()')
     main()
