@@ -12,21 +12,12 @@ def get_elo_of_tournament_players(name):
     groups = service.get_tournament_groups(name)
     total_player_list = []
     for group in groups:
-        player_list, _, _ = get_player_list(group["groupPlayerResults"])
+        player_list, _, _ = get_tournament_player_list(group["groupPlayerResults"])
         total_player_list.extend(player_list)
     return total_player_list
 
 def calculate_faction_win_rate(name, include_mirrored):
-    empire_wins = 0
-    empire_loses = 0
-    rebels_wins = 0
-    rebels_loses = 0
-    republic_wins = 0
-    republic_loses = 0
-    separatists_wins = 0
-    separatists_loses = 0
-    mercenary_wins = 0
-    mercenary_loses = 0
+    empire_wins = empire_loses = rebels_wins = rebels_loses = republic_wins = republic_loses = separatists_wins = separatists_loses = mercenary_wins = mercenary_loses = 0
     player_id_faction_dict = {}
     
     groups = service.get_tournament_groups(name)
@@ -68,7 +59,7 @@ def update_tournament_data(name):
     groups = service.get_tournament_groups(name)
     if groups:
         for group in groups:
-            player_list, player_id_elo_dict, player_id_weighted_elo_dict = get_player_list(group["groupPlayerResults"])
+            player_list, player_id_elo_dict, player_id_weighted_elo_dict = get_tournament_player_list(group["groupPlayerResults"])
             for round in group["rounds"]:
                 for match in round["matches"]:
                     if not match["isBye"] and match["winner"]:
@@ -90,10 +81,9 @@ def update_tournament_data(name):
                 # This costs too much
                 db.update_player(player)
 
-def get_player_list(players):
+def get_tournament_player_list(players):
     player_list = []
-    player_id_elo_dict = {}
-    player_id_weighted_elo_dict = {}
+    player_id_elo_dict = player_id_weighted_elo_dict = {}
     for player in players:
         db_player = get_player_info_from_db(player["player"])
         updated_player = get_game_results(db_player, player)
@@ -113,22 +103,14 @@ def get_player_info_from_db(player):
     return db_player
 
 def set_default_player(db_player):
-    db_player["elo"] = db.defaultElo
-    db_player["weighted_elo"] = db.defaultElo
-    db_player["games"] = 0
-    db_player["wins"] = 0
-    db_player["loses"] = 0
-    db_player["empire_wins"] = 0
-    db_player["empire_loses"] = 0
-    db_player["rebels_wins"] = 0
-    db_player["rebels_loses"] = 0
-    db_player["republic_wins"] = 0
-    db_player["republic_loses"] = 0
-    db_player["separatists_wins"] = 0
-    db_player["separatists_loses"] = 0
-    db_player["mercenary_wins"] = 0
-    db_player["mercenary_loses"] = 0
-    db_player["tournaments"] = "[]"
+    db_player["elo"] = db_player["weighted_elo"] = db.defaultElo
+    db_player["games"] = db_player["wins"] = db_player["loses"] = \
+        db_player["empire_wins"] = db_player["empire_loses"] = \
+        db_player["rebels_wins"] = db_player["rebels_loses"] = \
+        db_player["republic_wins"] = db_player["republic_loses"] = \
+        db_player["separatists_wins"] = db_player["separatists_loses"] = \
+        db_player["mercenary_wins"] = db_player["mercenary_loses"] = 0
+    db_player["tournaments"] ="[]"
     return db_player
     
 def get_game_results(db_player, player):
