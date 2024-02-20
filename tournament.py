@@ -5,18 +5,20 @@ import re
 
 # internal
 import db
-import elo
+import util.elo as elo
 import service
+import api
 
-def get_elo_of_tournament_players(name):
-    groups = service.get_tournament_groups(name)
+def get_elo_of_tournament_players(name, groups):
+    if groups is None:
+        groups = service.get_tournament_groups(name)
     total_player_list = []
     for group in groups:
         player_list, _, _ = get_tournament_player_list(group["groupPlayerResults"])
         total_player_list.extend(player_list)
     return total_player_list
 
-def calculate_faction_win_rate(name, include_mirrored):
+def calculate_faction_win_rate(name, include_mirrored, groups):
     empire_wins = empire_loses = \
         rebels_wins = rebels_loses = \
         republic_wins = republic_loses = \
@@ -24,7 +26,8 @@ def calculate_faction_win_rate(name, include_mirrored):
         mercenary_wins = mercenary_loses = 0
     player_id_faction_dict = {}
     
-    groups = service.get_tournament_groups(name)
+    if groups is None:
+        groups = service.get_tournament_groups(name)
     if groups:
         for group in groups:
             players = group["players"]
@@ -66,6 +69,41 @@ def calculate_faction_win_rate(name, include_mirrored):
         Republic: {republic_win_rate}, \
         Separatists: {separatists_win_rate}, \
         Mercenary: {mercenary_win_rate}")
+
+def tournament_lists_analysis(name):
+    tournament_lists = get_tournament_lists(name)
+    objective_card_dict = deployment_card_dict = condition_card_dict = command_card_dict = units_dict = upgrades_card_dict = {}
+    for list in tournament_lists:
+        battlefield_cards = list["battlefieldCards"]
+        if len(battlefield_cards) > 0:
+            for bcard in battlefield_cards:
+                match bcard["card"]["subType"]:
+                    case "objective":
+                        if bcard["card"]["name"] in objective_card_dict:
+                            objective_card_dict[bcard["card"]["name"]] += 1
+                        else:
+                            objective_card_dict[bcard["card"]["name"]] = 1
+                    case "deployment":
+                        if bcard["card"]["name"] in deployment_card_dict:
+                            deployment_card_dict[bcard["card"]["name"]] += 1
+                        else:
+                            deployment_card_dict[bcard["card"]["name"]] = 1
+                    case "condition":
+                        if bcard["card"]["name"] in condition_card_dict:
+                            condition_card_dict[bcard["card"]["name"]] += 1
+                        else:
+                            condition_card_dict[bcard["card"]["name"]] = 1
+    print(objective_card_dict, deployment_card_dict, condition_card_dict)
+
+def get_tournament_lists(name):
+    groups = service.get_tournament_groups(name)
+    player_id_list = []
+    for group in groups:
+        for player in group["players"]:
+            player_id_list.append(player["id"])
+    print(player_id_list)
+    api_list_data = api.get_tournament_lists(player_id_list)
+    return api_list_data.json()["data"]["legionLists"]
 
 def update_tournament_data(name):
     groups = service.get_tournament_groups(name)
@@ -151,14 +189,16 @@ def get_game_results(db_player, player):
 def main():
     # update_tournament_data("star-wars-legion-wq-at-pax-unplugged-2023")
     # update_tournament_data("atomic-empire-star-wars-legion-tournament-darkness-descends")
-    # player_list = get_elo_of_tournament_players("star-wars-legion-wq-at-pax-unplugged-2023")
+    # player_list = get_elo_of_tournament_players("star-wars-legion-wq-at-pax-unplugged-2023", None)
     # sorted_player_list = sorted(player_list, key=lambda i: i["weighted_elo"], reverse=True)
     # print(sorted_player_list)
     
-    print("Win Rate: ")
-    calculate_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023", True)
-    print("Non-Mirrored Win Rate: ")
-    calculate_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023", False)
+    # print("Win Rate: ")
+    # calculate_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023", True, None)
+    # print("Non-Mirrored Win Rate: ")
+    # calculate_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023", False, None)
+    
+    tournament_lists_analysis("star-wars-legion-wq-at-pax-unplugged-2023")
     
 if __name__ == '__main__':
     # cProfile.run('main()')

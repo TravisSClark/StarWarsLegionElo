@@ -1,0 +1,7 @@
+{
+    "query": "\n    query LegionLists($playerIds: [ID!]!) {\n  legionLists(playerIds: $playerIds) {\n    id\n    name\n    activations\n    points\n    faction\n    listLink\n    publicListLink\n    listWithHiddenInfo\n    player {\n      id\n    }\n    battlefieldCards {\n      card {\n        name\n        type\n        subType\n      }\n    }\n    commandCards {\n      card {\n        name\n        type\n        subType\n      }\n    }\n    units {\n      card {\n        name\n        title\n        rank\n        cost\n      }\n      upgrades {\n        card {\n          name\n          cost\n        }\n        isInLoadout\n      }\n    }\n    battleForce {\n      name\n    }\n  }\n}\n    ",
+    "variables": {
+      "playerIds": []
+    },
+    "operationName": "LegionLists"
+  }
