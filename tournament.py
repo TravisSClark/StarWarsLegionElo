@@ -17,7 +17,11 @@ def get_elo_of_tournament_players(name):
     return total_player_list
 
 def calculate_faction_win_rate(name, include_mirrored):
-    empire_wins = empire_loses = rebels_wins = rebels_loses = republic_wins = republic_loses = separatists_wins = separatists_loses = mercenary_wins = mercenary_loses = 0
+    empire_wins = empire_loses = \
+        rebels_wins = rebels_loses = \
+        republic_wins = republic_loses = \
+        separatists_wins = separatists_loses = \
+        mercenary_wins = mercenary_loses = 0
     player_id_faction_dict = {}
     
     groups = service.get_tournament_groups(name)
@@ -52,8 +56,16 @@ def calculate_faction_win_rate(name, include_mirrored):
     republic_win_rate = 100 * republic_wins / (republic_wins + republic_loses)
     separatists_win_rate = 100 * separatists_wins / (separatists_wins + separatists_loses)
     mercenary_win_rate = 100 * mercenary_wins / (mercenary_wins + mercenary_loses)
-    print(f"Empire: {empire_wins}-{empire_loses}, Rebels: {rebels_wins}-{rebels_loses}, Republic: {republic_wins}-{republic_loses}, Separatists: {separatists_wins}-{separatists_loses}, Mercenary: {mercenary_wins}-{mercenary_loses}")
-    print(f"Empire: {empire_win_rate}, Rebels: {rebels_win_rate}, Republic: {republic_win_rate}, Separatists: {separatists_win_rate}, Mercenary: {mercenary_win_rate}")
+    print(f"Empire: {empire_wins}-{empire_loses}, \
+        Rebels: {rebels_wins}-{rebels_loses}, \
+        Republic: {republic_wins}-{republic_loses}, \
+        Separatists: {separatists_wins}-{separatists_loses}, \
+        Mercenary: {mercenary_wins}-{mercenary_loses}")
+    print(f"Empire: {empire_win_rate}, \
+        Rebels: {rebels_win_rate}, \
+        Republic: {republic_win_rate}, \
+        Separatists: {separatists_win_rate}, \
+        Mercenary: {mercenary_win_rate}")
 
 def update_tournament_data(name):
     groups = service.get_tournament_groups(name)
