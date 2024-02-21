@@ -65,13 +65,21 @@ def get_player_info_from_db(player):
     return db_player
 
 def set_default_player(db_player):
-    db_player["elo"] = db_player["weighted_elo"] = db.defaultElo
-    db_player["games"] = db_player["wins"] = db_player["loses"] = \
-        db_player["empire_wins"] = db_player["empire_loses"] = \
-        db_player["rebels_wins"] = db_player["rebels_loses"] = \
-        db_player["republic_wins"] = db_player["republic_loses"] = \
-        db_player["separatists_wins"] = db_player["separatists_loses"] = \
-        db_player["mercenary_wins"] = db_player["mercenary_loses"] = 0
+    db_player["elo"] = db.defaultElo
+    db_player["weighted_elo"] = db.defaultElo
+    db_player["games"] = 0
+    db_player["wins"] = 0
+    db_player["loses"] = 0
+    db_player["empire_wins"] = 0
+    db_player["empire_loses"] = 0
+    db_player["rebels_wins"] = 0
+    db_player["rebels_loses"] = 0
+    db_player["republic_wins"] = 0
+    db_player["republic_loses"] = 0
+    db_player["separatists_wins"] = 0
+    db_player["separatists_loses"] = 0
+    db_player["mercenary_wins"] = 0
+    db_player["mercenary_loses"] = 0
     db_player["tournaments"] ="[]"
     return db_player
     
