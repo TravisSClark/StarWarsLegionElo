@@ -33,59 +33,6 @@ def calculate_faction_win_rate(name, include_mirrored, groups):
         faction_win_dict[faction]["Winrate"] = 100 * faction_win_dict[faction]["Wins"] / (faction_win_dict[faction]["Wins"] + faction_win_dict[faction]["Loses"])
     return dict(sorted(faction_win_dict.items(), key=lambda item: item[1]["Winrate"], reverse=True))
 
-def tournament_lists_analysis(name):
-    tournament_lists = get_tournament_lists(name)
-    objective_card_dict = {}
-    deployment_card_dict = {}
-    condition_card_dict = {}
-    command_card_dict = {}
-    units_dict = {}
-    upgrades_card_dict = {}
-    for list in tournament_lists:
-        battlefield_cards = list["battlefieldCards"]
-        for bcard in battlefield_cards:
-            match bcard["card"]["subType"]:
-                case "objective":
-                    if bcard["card"]["name"] in objective_card_dict:
-                        objective_card_dict[bcard["card"]["name"]] += 1
-                    else:
-                        objective_card_dict[bcard["card"]["name"]] = 1
-                case "deployment":
-                    if bcard["card"]["name"] in deployment_card_dict:
-                        deployment_card_dict[bcard["card"]["name"]] += 1
-                    else:
-                        deployment_card_dict[bcard["card"]["name"]] = 1
-                case "condition":
-                    if bcard["card"]["name"] in condition_card_dict:
-                        condition_card_dict[bcard["card"]["name"]] += 1
-                    else:
-                        condition_card_dict[bcard["card"]["name"]] = 1
-        command_cards = list["commandCards"]
-        for ccard in command_cards:
-            if ccard["card"]["name"] in command_card_dict:
-                command_card_dict[ccard["card"]["name"]] += 1
-            else:
-                command_card_dict[ccard["card"]["name"]] = 1
-        unit_cards = list["units"]
-        for unit_card in unit_cards:
-            if unit_card["card"]["name"] in units_dict:
-                units_dict[unit_card["card"]["name"]] += 1
-            else:
-                units_dict[unit_card["card"]["name"]] = 1
-            upgrade_cards = unit_card["upgrades"]
-            if len(upgrade_cards) > 0:
-                for up_card in upgrade_cards:
-                    if up_card["card"]["name"] in upgrades_card_dict:
-                        upgrades_card_dict[up_card["card"]["name"]] += 1
-                    else:
-                        upgrades_card_dict[up_card["card"]["name"]] = 1
-    objective_card_dict = dict(sorted(objective_card_dict.items(), key=lambda x:x[1], reverse=True))
-    deployment_card_dict = dict(sorted(deployment_card_dict.items(), key=lambda x:x[1], reverse=True))
-    condition_card_dict = dict(sorted(condition_card_dict.items(), key=lambda x:x[1], reverse=True))
-    units_dict = dict(sorted(units_dict.items(), key=lambda x:x[1], reverse=True))
-    upgrades_card_dict = dict(sorted(upgrades_card_dict.items(), key=lambda x:x[1], reverse=True))
-    return objective_card_dict, deployment_card_dict, condition_card_dict, units_dict, upgrades_card_dict
-
 def get_tournament_lists(name):
     groups = api.get_tournament_data(name)
     player_id_list = []
@@ -94,6 +41,104 @@ def get_tournament_lists(name):
             player_id_list.append(player["id"])
     api_list_data = api.get_tournament_lists(player_id_list)
     return api_list_data.json()["data"]["legionLists"]
+
+def tournament_lists_analysis(name):
+    tournament_lists = get_tournament_lists(name)
+    objective_card_dict = {}
+    deployment_card_dict = {}
+    condition_card_dict = {}
+    command_card_dict = {}
+    units_dict = {}
+    upgrades_card_dict = {}
+    for tlist in tournament_lists:
+        objective_card_dict, deployment_card_dict, condition_card_dict = \
+            get_battlefield_cards(tlist, objective_card_dict, deployment_card_dict, condition_card_dict)
+        command_card_dict = get_command_cards(tlist, command_card_dict)
+        units_dict, upgrades_card_dict = get_unit_cards(tlist, units_dict, upgrades_card_dict)
+    objective_card_dict = dict(sorted(objective_card_dict.items(), key=lambda x:x[1], reverse=True))
+    deployment_card_dict = dict(sorted(deployment_card_dict.items(), key=lambda x:x[1], reverse=True))
+    condition_card_dict = dict(sorted(condition_card_dict.items(), key=lambda x:x[1], reverse=True))
+    command_card_dict = dict(sorted(command_card_dict.items(), key=lambda x:x[1], reverse=True))
+    units_dict = dict(sorted(units_dict.items(), key=lambda x:x[1], reverse=True))
+    upgrades_card_dict = dict(sorted(upgrades_card_dict.items(), key=lambda x:x[1], reverse=True))
+    return objective_card_dict, deployment_card_dict, condition_card_dict, command_card_dict, units_dict, upgrades_card_dict
+
+def battlefield_card_analysis(name):
+    tournament_lists = get_tournament_lists(name)
+    objective_card_dict = {}
+    deployment_card_dict = {}
+    condition_card_dict = {}
+    for tlist in tournament_lists:
+        objective_card_dict, deployment_card_dict, condition_card_dict = \
+            get_battlefield_cards(tlist, objective_card_dict, deployment_card_dict, condition_card_dict)
+    objective_card_dict = dict(sorted(objective_card_dict.items(), key=lambda x:x[1], reverse=True))
+    deployment_card_dict = dict(sorted(deployment_card_dict.items(), key=lambda x:x[1], reverse=True))
+    condition_card_dict = dict(sorted(condition_card_dict.items(), key=lambda x:x[1], reverse=True))
+    return objective_card_dict, deployment_card_dict, condition_card_dict
+    
+def get_battlefield_cards(tlist, objective_card_dict, deployment_card_dict, condition_card_dict):
+    battlefield_cards = tlist["battlefieldCards"]
+    for bcard in battlefield_cards:
+        match bcard["card"]["subType"]:
+            case "objective":
+                if bcard["card"]["name"] in objective_card_dict:
+                    objective_card_dict[bcard["card"]["name"]] += 1
+                else:
+                    objective_card_dict[bcard["card"]["name"]] = 1
+            case "deployment":
+                if bcard["card"]["name"] in deployment_card_dict:
+                    deployment_card_dict[bcard["card"]["name"]] += 1
+                else:
+                    deployment_card_dict[bcard["card"]["name"]] = 1
+            case "condition":
+                if bcard["card"]["name"] in condition_card_dict:
+                    condition_card_dict[bcard["card"]["name"]] += 1
+                else:
+                    condition_card_dict[bcard["card"]["name"]] = 1
+    return objective_card_dict, deployment_card_dict, condition_card_dict
+
+def command_card_analysis(name):
+    tournament_lists = get_tournament_lists(name)
+    command_card_dict = {}
+    for tlist in tournament_lists:
+        command_card_dict = get_command_cards(tlist, command_card_dict)
+    command_card_dict = dict(sorted(command_card_dict.items(), key=lambda x:x[1], reverse=True))
+    return command_card_dict
+    
+def get_command_cards(tlist, command_card_dict):
+    command_cards = tlist["commandCards"]
+    for ccard in command_cards:
+        if ccard["card"]["name"] in command_card_dict:
+            command_card_dict[ccard["card"]["name"]] += 1
+        else:
+            command_card_dict[ccard["card"]["name"]] = 1
+    return command_card_dict
+
+def unit_card_analysis(name):
+    tournament_lists = get_tournament_lists(name)
+    units_dict = {}
+    upgrades_card_dict = {}
+    for tlist in tournament_lists:
+        units_dict, upgrades_card_dict = get_unit_cards(tlist, units_dict, upgrades_card_dict)
+    units_dict = dict(sorted(units_dict.items(), key=lambda x:x[1], reverse=True))
+    upgrades_card_dict = dict(sorted(upgrades_card_dict.items(), key=lambda x:x[1], reverse=True))
+    return units_dict, upgrades_card_dict
+    
+def get_unit_cards(tlist, units_dict, upgrades_card_dict):
+    unit_cards = tlist["units"]
+    for unit_card in unit_cards:
+        if unit_card["card"]["name"] in units_dict:
+            units_dict[unit_card["card"]["name"]] += 1
+        else:
+            units_dict[unit_card["card"]["name"]] = 1
+        upgrade_cards = unit_card["upgrades"]
+        if len(upgrade_cards) > 0:
+            for up_card in upgrade_cards:
+                if up_card["card"]["name"] in upgrades_card_dict:
+                    upgrades_card_dict[up_card["card"]["name"]] += 1
+                else:
+                    upgrades_card_dict[up_card["card"]["name"]] = 1
+    return units_dict, upgrades_card_dict
 
 def main():
     # print(calculate_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023", True, None))
