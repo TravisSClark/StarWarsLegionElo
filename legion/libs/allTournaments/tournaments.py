@@ -1,7 +1,7 @@
 # internal
-import dataAccess.db as db
+from ..dataAccess import db
 import tournamentsService
-import tournament
+import legion.tournament as tournament
 
 # external
 import json
@@ -16,14 +16,14 @@ def main():
     # update_elos("2023-12-04 01:00:00", "2024-02-20 01:00:00")
     players = db.get_all()
     weightedPlayers = db.get_all_sorted("weighted_elo")
-    with open("data/response/getAll.json", "w", encoding='utf8') as file:
+    with open("legion/data/response/getAll.json", "w", encoding='utf8') as file:
         file.write("[\n")
         for player in players:
             json.dump(player, file, ensure_ascii=False)
             file.write(",\n")
         file.write("{}\n]")
         players = db.get_all()
-    with open("data/response/getAllWeighted.json", "w", encoding='utf8') as file:
+    with open("legion/data/response/getAllWeighted.json", "w", encoding='utf8') as file:
         file.write("[\n")
         for wp in weightedPlayers:
             json.dump(wp, file, ensure_ascii=False)

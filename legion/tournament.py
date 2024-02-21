@@ -16,11 +16,11 @@ def get_elo_of_tournament_players(name, groups):
     return total_player_list
 
 def calculate_faction_win_rate(name, include_mirrored, groups):
-    empire_wins = empire_loses = \
-        rebels_wins = rebels_loses = \
-        republic_wins = republic_loses = \
-        separatists_wins = separatists_loses = \
-        mercenary_wins = mercenary_loses = 0
+    faction_win_dict = {"EMPIRE" : {"Wins" : 0, "Loses" : 0, "Winrate" : 0.0}, \
+        "REBELS" : {"Wins" : 0, "Loses" : 0, "Winrate" : 0.0}, \
+        "REPUBLIC" : {"Wins" : 0, "Loses" : 0, "Winrate" : 0.0}, \
+        "SEPARATISTS" : {"Wins" : 0, "Loses" : 0, "Winrate" : 0.0}, \
+        "MERCENARY" : {"Wins" : 0, "Loses" : 0, "Winrate" : 0.0}}
     player_id_faction_dict = {}
     
     if groups is None:
@@ -38,34 +38,12 @@ def calculate_faction_win_rate(name, include_mirrored, groups):
                         loser_id = int(match["loser"]["id"])
                         if winner_id in player_id_faction_dict and loser_id in player_id_faction_dict:
                             if include_mirrored or player_id_faction_dict[winner_id] != player_id_faction_dict[loser_id]:
-                                match player_id_faction_dict[winner_id]:
-                                    case "EMPIRE": empire_wins += 1
-                                    case "REBELS": rebels_wins += 1
-                                    case "REPUBLIC": republic_wins += 1
-                                    case "SEPARATISTS": separatists_wins += 1
-                                    case "MERCENARY": mercenary_wins += 1
-                                match player_id_faction_dict[loser_id]:
-                                    case "EMPIRE": empire_loses += 1
-                                    case "REBELS": rebels_loses += 1
-                                    case "REPUBLIC": republic_loses += 1
-                                    case "SEPARATISTS": separatists_loses += 1
-                                    case "MERCENARY": mercenary_loses += 1
-                            
-    empire_win_rate = 100 * empire_wins / (empire_wins + empire_loses)
-    rebels_win_rate = 100 * rebels_wins / (rebels_wins + rebels_loses)
-    republic_win_rate = 100 * republic_wins / (republic_wins + republic_loses)
-    separatists_win_rate = 100 * separatists_wins / (separatists_wins + separatists_loses)
-    mercenary_win_rate = 100 * mercenary_wins / (mercenary_wins + mercenary_loses)
-    print(f"Empire: {empire_wins}-{empire_loses}, \
-        Rebels: {rebels_wins}-{rebels_loses}, \
-        Republic: {republic_wins}-{republic_loses}, \
-        Separatists: {separatists_wins}-{separatists_loses}, \
-        Mercenary: {mercenary_wins}-{mercenary_loses}")
-    print(f"Empire: {empire_win_rate}, \
-        Rebels: {rebels_win_rate}, \
-        Republic: {republic_win_rate}, \
-        Separatists: {separatists_win_rate}, \
-        Mercenary: {mercenary_win_rate}")
+                                faction_win_dict[player_id_faction_dict[winner_id]]["Wins"] += 1
+                                faction_win_dict[player_id_faction_dict[loser_id]]["Loses"] += 1
+                     
+    for faction in faction_win_dict:
+        faction_win_dict[faction]["Winrate"] = 100 * faction_win_dict[faction]["Wins"] / (faction_win_dict[faction]["Wins"] + faction_win_dict[faction]["Loses"])
+    return dict(sorted(faction_win_dict.items(), key=lambda item: item[1]["Winrate"], reverse=True))
 
 def tournament_lists_analysis(name):
     tournament_lists = get_tournament_lists(name)
@@ -190,12 +168,8 @@ def main():
     # sorted_player_list = sorted(player_list, key=lambda i: i["weighted_elo"], reverse=True)
     # print(sorted_player_list)
     
-    # print("Win Rate: ")
-    # calculate_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023", True, None)
-    # print("Non-Mirrored Win Rate: ")
-    # calculate_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023", False, None)
-    
-    tournament_lists_analysis("star-wars-legion-wq-at-pax-unplugged-2023")
+    print(calculate_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023", True, None))
+    # tournament_lists_analysis("star-wars-legion-wq-at-pax-unplugged-2023")
     
 if __name__ == '__main__':
     main()
