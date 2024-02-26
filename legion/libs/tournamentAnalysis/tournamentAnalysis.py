@@ -1,3 +1,4 @@
+import pprint
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -19,8 +20,8 @@ def calculate_faction_win_rate(name, include_mirrored, groups):
             for player in players:
                 if player["legionList"]:
                     player_id_faction_dict[int(player["id"])] = player["legionList"]["faction"]
-            for round in group["rounds"]:
-                for match in round["matches"]:
+            for group_round in group["rounds"]:
+                for match in group_round["matches"]:
                     if not match["isBye"] and match["winner"]:
                         winner_id = int(match["winner"]["id"])
                         loser_id = int(match["loser"]["id"])
@@ -30,7 +31,8 @@ def calculate_faction_win_rate(name, include_mirrored, groups):
                                 faction_win_dict[player_id_faction_dict[loser_id]]["Loses"] += 1
                      
     for faction in faction_win_dict:
-        faction_win_dict[faction]["Winrate"] = 100 * faction_win_dict[faction]["Wins"] / (faction_win_dict[faction]["Wins"] + faction_win_dict[faction]["Loses"])
+        win_rate = 100 * faction_win_dict[faction]["Wins"] / (faction_win_dict[faction]["Wins"] + faction_win_dict[faction]["Loses"])
+        faction_win_dict[faction]["Winrate"] = round(win_rate,2)
     return dict(sorted(faction_win_dict.items(), key=lambda item: item[1]["Winrate"], reverse=True))
 
 def get_tournament_lists(name):
@@ -61,7 +63,12 @@ def tournament_lists_analysis(name):
     command_card_dict = dict(sorted(command_card_dict.items(), key=lambda x:x[1], reverse=True))
     units_dict = dict(sorted(units_dict.items(), key=lambda x:x[1], reverse=True))
     upgrades_card_dict = dict(sorted(upgrades_card_dict.items(), key=lambda x:x[1], reverse=True))
-    return objective_card_dict, deployment_card_dict, condition_card_dict, command_card_dict, units_dict, upgrades_card_dict
+    return {'Objectives': objective_card_dict,
+            'Deployments': deployment_card_dict,
+            'Conditions': condition_card_dict,
+            'Command Cards': command_card_dict,
+            'Units': units_dict,
+            'Upgrades': upgrades_card_dict}
 
 def battlefield_card_analysis(name):
     tournament_lists = get_tournament_lists(name)
@@ -141,8 +148,9 @@ def get_unit_cards(tlist, units_dict, upgrades_card_dict):
     return units_dict, upgrades_card_dict
 
 def main():
-    # print(calculate_faction_win_rate("star-wars-legion-wq-at-pax-unplugged-2023", True, None))
-    print(tournament_lists_analysis("star-wars-legion-wq-at-pax-unplugged-2023"))
+    print("Non-Mirrored:",calculate_faction_win_rate("cherokee-open-2024", True, None))
+    print("Mirrored:",calculate_faction_win_rate("cherokee-open-2024", False, None))
+    pprint.pprint(tournament_lists_analysis("cherokee-open-2024"), sort_dicts=False)
     
 if __name__ == '__main__':
     main()
