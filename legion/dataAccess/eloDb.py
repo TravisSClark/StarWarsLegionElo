@@ -2,8 +2,9 @@
 import sqlite3
 from sqlite3 import Error
 
-tableName = "players"
+playerEloTableName = "Player_Elos"
 defaultElo = 800
+defaultGames = 0
 
 def create_connection():
     database = r'..\sqlite\db\eloSQLite.db'
@@ -21,24 +22,24 @@ def create_table():
     conn = create_connection()
     
     if conn is not None:
-        sql_create_players_table = f""" CREATE TABLE {tableName} (
+        sql_create_players_table = f""" CREATE TABLE {playerEloTableName} (
                                             id integer PRIMARY KEY,
                                             name text NOT NULL,
                                             elo integer DEFAULT {defaultElo},
                                             weighted_elo integer DEFAULT {defaultElo},
-                                            games integer DEFAULT 0,
-                                            wins integer DEFAULT 0,
-                                            loses integer DEFAULT 0,
-                                            empire_wins integar DEFAULT 0,
-                                            empire_loses integar DEFAULT 0,
-                                            rebels_wins integar DEFAULT 0,
-                                            rebels_loses integar DEFAULT 0,
-                                            republic_wins integar DEFAULT 0,
-                                            republic_loses integar DEFAULT 0,
-                                            separatists_wins integar DEFAULT 0,
-                                            separatists_loses integar DEFAULT 0,
-                                            mercenary_wins integar DEFAULT 0,
-                                            mercenary_loses integar DEFAULT 0,
+                                            games integer DEFAULT {defaultGames},
+                                            wins integer DEFAULT {defaultGames},
+                                            loses integer DEFAULT {defaultGames},
+                                            empire_wins integar DEFAULT {defaultGames},
+                                            empire_loses integar DEFAULT {defaultGames},
+                                            rebels_wins integar DEFAULT {defaultGames},
+                                            rebels_loses integar DEFAULT {defaultGames},
+                                            republic_wins integar DEFAULT {defaultGames},
+                                            republic_loses integar DEFAULT {defaultGames},
+                                            separatists_wins integar DEFAULT {defaultGames},
+                                            separatists_loses integar DEFAULT {defaultGames},
+                                            mercenary_wins integar DEFAULT {defaultGames},
+                                            mercenary_loses integar DEFAULT {defaultGames},
                                             tournaments text DEFAULT '[]'
                                         ); """
         try:
@@ -60,7 +61,7 @@ def get_all_sorted(sort_column):
     if conn is not None:
         sql_select_player = f"""SELECT ROW_NUMBER () OVER ( ORDER BY {sort_column} DESC, elo DESC ) RowNum, name, elo, weighted_elo, games, wins, loses, 
         empire_wins, empire_loses, rebels_wins, rebels_loses, republic_wins, republic_loses, separatists_wins, separatists_loses, 
-        mercenary_wins, mercenary_loses, tournaments FROM {tableName}"""
+        mercenary_wins, mercenary_loses, tournaments FROM {playerEloTableName}"""
         cur = conn.cursor()
         cur.execute(sql_select_player)
         columns = cur.description 
@@ -73,10 +74,10 @@ def get_all_sorted(sort_column):
         print("Error! Cannot get all players.")
         
 def get_player(id):
-    conn = create_connection()
+    conn = create_connection(playerEloTableName)
     
     if conn is not None:
-        sql_select_player = f"SELECT * FROM {tableName} WHERE id={id}"
+        sql_select_player = f"SELECT * FROM {playerEloTableName} WHERE id={id}"
         cur = conn.cursor()
         cur.execute(sql_select_player)
         player = cur.fetchone()
@@ -89,10 +90,10 @@ def get_player(id):
         print("Error! Cannot get player.")
 
 def insert_player(id, name):
-    conn = create_connection()
+    conn = create_connection(playerEloTableName)
     
     if conn is not None:
-        sql_insert_player = f"INSERT INTO {tableName} (id, name) VALUES(?,?)"
+        sql_insert_player = f"INSERT INTO {playerEloTableName} (id, name) VALUES(?,?)"
         cur = conn.cursor()
         cur.execute(sql_insert_player, (id, name))
         conn.commit()
@@ -102,10 +103,10 @@ def insert_player(id, name):
         print("Error! Cannot insert new player.")
     
 def update_player(player):
-    conn = create_connection()
+    conn = create_connection(playerEloTableName)
     
     if conn is not None:
-        sql_update_player = f""" UPDATE {tableName} SET name = ? , elo = ? , weighted_elo = ? ,games = ? , wins = ? , loses = ? , 
+        sql_update_player = f""" UPDATE {playerEloTableName} SET name = ? , elo = ? , weighted_elo = ? ,games = ? , wins = ? , loses = ? , 
         empire_wins = ? , empire_loses = ? , rebels_wins = ? , rebels_loses = ? , 
         republic_wins = ? , republic_loses = ? , separatists_wins = ? , separatists_loses = ? , mercenary_wins = ? , mercenary_loses = ? , tournaments = ? 
         WHERE id = ?"""

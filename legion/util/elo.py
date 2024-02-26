@@ -1,10 +1,11 @@
 #external
 import math
 
-startingElo = 800
-
 # Match score diff
 K = 30
+
+# Games before ELO is calculated
+max_phantom_games = 8
 
 # player_one_winner is a boolean
 def elo_rating(player_one_elo, player_two_elo, player_one_winner):

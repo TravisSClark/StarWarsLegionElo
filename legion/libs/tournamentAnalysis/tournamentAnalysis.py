@@ -148,9 +148,9 @@ def get_unit_cards(tlist, units_dict, upgrades_card_dict):
     return units_dict, upgrades_card_dict
 
 def main():
-    print("Non-Mirrored:",calculate_faction_win_rate("cherokee-open-2024", True, None))
-    print("Mirrored:",calculate_faction_win_rate("cherokee-open-2024", False, None))
-    pprint.pprint(tournament_lists_analysis("cherokee-open-2024"), sort_dicts=False)
+    print("Include Mirrored:",calculate_faction_win_rate("cherokee-open-2024", True, None))
+    print("Don't Include Mirrored:",calculate_faction_win_rate("cherokee-open-2024", False, None))
+    # pprint.pprint(tournament_lists_analysis("cherokee-open-2024"), sort_dicts=False)
     
 if __name__ == '__main__':
     main()
