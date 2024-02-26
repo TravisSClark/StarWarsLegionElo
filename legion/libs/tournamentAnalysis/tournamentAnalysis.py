@@ -13,7 +13,7 @@ def calculate_faction_win_rate(name, include_mirrored, groups):
     player_id_faction_dict = {}
     
     if groups is None:
-        groups = api.get_tournament_data(name)
+        groups = api.get_tournament_data(name)['groups']
     if groups:
         for group in groups:
             players = group["players"]
@@ -36,7 +36,7 @@ def calculate_faction_win_rate(name, include_mirrored, groups):
     return dict(sorted(faction_win_dict.items(), key=lambda item: item[1]["Winrate"], reverse=True))
 
 def get_tournament_lists(name):
-    groups = api.get_tournament_data(name)
+    groups = api.get_tournament_data(name)["groups"]
     player_id_list = []
     for group in groups:
         for player in group["players"]:

@@ -30,17 +30,8 @@ def create_table():
                                             games integer DEFAULT {defaultGames},
                                             wins integer DEFAULT {defaultGames},
                                             loses integer DEFAULT {defaultGames},
-                                            empire_wins integar DEFAULT {defaultGames},
-                                            empire_loses integar DEFAULT {defaultGames},
-                                            rebels_wins integar DEFAULT {defaultGames},
-                                            rebels_loses integar DEFAULT {defaultGames},
-                                            republic_wins integar DEFAULT {defaultGames},
-                                            republic_loses integar DEFAULT {defaultGames},
-                                            separatists_wins integar DEFAULT {defaultGames},
-                                            separatists_loses integar DEFAULT {defaultGames},
-                                            mercenary_wins integar DEFAULT {defaultGames},
-                                            mercenary_loses integar DEFAULT {defaultGames},
-                                            tournaments text DEFAULT '[]'
+                                            change integer DEFAULT {defaultGames},
+                                            change_date text NOT NULL
                                         ); """
         try:
             cur = conn.cursor()
@@ -59,9 +50,8 @@ def get_all_sorted(sort_column):
     conn = create_connection()
     
     if conn is not None:
-        sql_select_player = f"""SELECT ROW_NUMBER () OVER ( ORDER BY {sort_column} DESC, elo DESC ) RowNum, name, elo, weighted_elo, games, wins, loses, 
-        empire_wins, empire_loses, rebels_wins, rebels_loses, republic_wins, republic_loses, separatists_wins, separatists_loses, 
-        mercenary_wins, mercenary_loses, tournaments FROM {playerEloTableName}"""
+        sql_select_player = f"""SELECT ROW_NUMBER () OVER ( ORDER BY {sort_column} DESC, elo DESC ) RowNum, name, elo, weighted_elo, games, wins, loses,
+            change, change_date FROM {playerEloTableName}"""
         cur = conn.cursor()
         cur.execute(sql_select_player)
         columns = cur.description 
@@ -73,7 +63,7 @@ def get_all_sorted(sort_column):
     else:
         print("Error! Cannot get all players.")
         
-def get_player(id):
+def get_player_info(id):
     conn = create_connection(playerEloTableName)
     
     if conn is not None:
@@ -89,13 +79,13 @@ def get_player(id):
     else:
         print("Error! Cannot get player.")
 
-def insert_player(id, name):
+def insert_player(id, name, date):
     conn = create_connection(playerEloTableName)
     
     if conn is not None:
-        sql_insert_player = f"INSERT INTO {playerEloTableName} (id, name) VALUES(?,?)"
+        sql_insert_player = f"INSERT INTO {playerEloTableName} (id, name, date) VALUES(?,?,?)"
         cur = conn.cursor()
-        cur.execute(sql_insert_player, (id, name))
+        cur.execute(sql_insert_player, (id, name, date))
         conn.commit()
         cur.close()
         conn.close()
@@ -106,15 +96,10 @@ def update_player(player):
     conn = create_connection(playerEloTableName)
     
     if conn is not None:
-        sql_update_player = f""" UPDATE {playerEloTableName} SET name = ? , elo = ? , weighted_elo = ? ,games = ? , wins = ? , loses = ? , 
-        empire_wins = ? , empire_loses = ? , rebels_wins = ? , rebels_loses = ? , 
-        republic_wins = ? , republic_loses = ? , separatists_wins = ? , separatists_loses = ? , mercenary_wins = ? , mercenary_loses = ? , tournaments = ? 
+        sql_update_player = f""" UPDATE {playerEloTableName} SET name = ? , elo = ? , weighted_elo = ? ,games = ? , wins = ? , loses = ?
         WHERE id = ?"""
         cur = conn.cursor()
-        cur.execute(sql_update_player, (player["name"], player["elo"], player["weighted_elo"], player["games"], player["wins"], player["loses"],
-                                        player["empire_wins"], player["empire_loses"], player["rebels_wins"], player["rebels_loses"],
-                                        player["republic_wins"], player["republic_loses"], player["separatists_wins"], player["separatists_loses"],
-                                        player["mercenary_wins"], player["mercenary_loses"], player["tournaments"], player["id"]))
+        cur.execute(sql_update_player, (player["name"], player["elo"], player["weighted_elo"], player["games"], player["wins"], player["loses"], player["id"]))
         conn.commit()
         cur.close()
         conn.close()

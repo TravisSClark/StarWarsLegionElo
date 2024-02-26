@@ -8,32 +8,28 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from dataAccess import api, eloDb
 from util import elo
 
-def get_elo_of_tournament_players(name, groups):
-    if groups is None:
-        groups = api.get_tournament_data(name)
-    total_player_list = []
-    for group in groups:
-        player_list, _, _ = get_tournament_player_list(group["groupPlayerResults"])
-        total_player_list.extend(player_list)
-    return total_player_list
-
 def update_tournament_data(name):
-    groups = api.get_tournament_data(name)
-    player_list, player_id_elo_dict, player_id_weighted_elo_dict = {}
-    if groups:
-        for group in groups:
-            player_list, player_id_elo_dict, player_id_weighted_elo_dict = get_tournament_player_list(group["groupPlayerResults"])
-            for round in group["rounds"]:
-                for match in round["matches"]:
-                    if not match["isBye"] and match["winner"]:
-                        player_one_id = int(match["playerOne"]["user"]["id"])
-                        player_two_id = int(match["playerTwo"]["user"]["id"])
-                        winner_id = int(match["winner"]["user"]["id"])
-                        player_one_winner = player_one_id == winner_id
-                        player_id_elo_dict[player_one_id], player_id_elo_dict[player_two_id] = elo.elo_rating(
-                            player_id_elo_dict[player_one_id], player_id_elo_dict[player_two_id], player_one_winner)
-                        player_id_weighted_elo_dict[player_one_id], player_id_weighted_elo_dict[player_two_id] = elo.weighted_elo_rating(
-                            player_id_weighted_elo_dict[player_one_id], player_id_weighted_elo_dict[player_two_id], player_one_winner)
+    tournament_data = api.get_tournament_data(name)
+    groups = tournament_data["groups"]
+    tournament_date = tournament_data["endsAt"]
+    player_elo_dict, player_list, new_player_list = get_tournament_players(groups)
+    if len(new_player_list) > 0:
+        db_new_player_dict, db_new_player_list = insert_new_players(new_player_list, tournament_date)
+        player_elo_dict.update(db_new_player_dict)
+        player_list.extend(db_new_player_list)
+    for group in groups:
+        for round in group["rounds"]:
+            for match in round["matches"]:
+                if not match["isBye"] and match["winner"]:
+                    player_one_id = int(match["playerOne"]["user"]["id"])
+                    player_two_id = int(match["playerTwo"]["user"]["id"])
+                    winner_id = int(match["winner"]["user"]["id"])
+                    player_one_winner = player_one_id == winner_id
+                    player_elo_dict[player_one_id]["elo"], player_elo_dict[player_two_id]["elo"] = elo.elo_rating(
+                        player_elo_dict[player_one_id]["elo"], player_elo_dict[player_two_id]["elo"], player_one_winner)
+                    player_elo_dict[player_one_id]["weighted_elo"], player_elo_dict[player_two_id]["weighted_elo"] = elo.weighted_elo_rating(
+                        player_elo_dict[player_one_id]["weighted_elo"], player_elo_dict[player_two_id]["weighted_elo"], player_one_winner)
+    # Fix this, idk
     for player in player_list:
         player["elo"] = player_id_elo_dict[player["id"]]
         player["weighted_elo"] = player_id_weighted_elo_dict[player["id"]]
@@ -43,27 +39,34 @@ def update_tournament_data(name):
         player["tournaments"] = json.dumps(tournament_list)
         # This costs too much
         eloDb.update_player(player)
+        
+def get_tournament_players(groups):
+    player_list, new_player_list = []
+    player_id_elo_dict = {}
+    for group in groups:
+        for player in group["groupPlayerResults"]:
+            if (not int(player["player"]["user"]["id"]) in player_id_elo_dict) and (not player in player_list):
+                db_player = eloDb.get_player_info(int(player["player"]["user"]["id"])) or {}
+                if not db_player:
+                    new_player_list.append(player)
+                else:
+                    db_player["name"] = player["user"]["name"]
+                    player_list.append(db_player)
+                    player_id_elo_dict[db_player["id"]]["name"] = player["user"]["name"]
+                    player_id_elo_dict[db_player["id"]]["elo"] = db_player["elo"]
+                    player_id_elo_dict[db_player["id"]]["weighted_elo"] = db_player["weighted_elo"]
+    return player_id_elo_dict, player_list, new_player_list
 
-def get_tournament_player_list(players):
+def insert_new_players(new_player_list, tournament_date):
     player_list = []
-    player_id_elo_dict = player_id_weighted_elo_dict = {}
-    for player in players:
-        db_player = get_player_info_from_db(player["player"])
-        updated_player = get_game_results(db_player, player)
-        player_list.append(updated_player)
-        player_id_elo_dict[updated_player["id"]] = updated_player["elo"]
-        player_id_weighted_elo_dict[updated_player["id"]] = updated_player["weighted_elo"]
-    
-    return player_list, player_id_elo_dict, player_id_weighted_elo_dict
-
-def get_player_info_from_db(player):
-    db_player = eloDb.get_player(int(player["user"]["id"])) or {}
-    if not db_player:
-        eloDb.insert_player(player["user"]["id"], player["user"]["name"])
-        db_player["id"] = int(player["user"]["id"])
-        db_player = eloDb.get_player(int(player["user"]["id"]))
-    db_player["name"] = player["user"]["name"]
-    return db_player
+    player_id_elo_dict = {}
+    for player in new_player_list:
+        eloDb.insert_player(player["user"]["id"], player["user"]["name"], tournament_date)
+        db_player = eloDb.get_player_info(int(player["user"]["id"]))
+        player_id_elo_dict[db_player["id"]]["name"] = player["user"]["name"]
+        player_id_elo_dict[db_player["id"]]["elo"] = db_player["elo"]
+        player_id_elo_dict[db_player["id"]]["weighted_elo"] = db_player["weighted_elo"]
+    return player_list, player_id_elo_dict
     
 def get_game_results(db_player, player):
     db_player["games"] += player["wonMatchesAmount"] + player["lostMatchesAmount"]
@@ -87,6 +90,12 @@ def get_game_results(db_player, player):
                 db_player["mercenary_wins"] += player["wonMatchesAmount"]
                 db_player["mercenary_loses"] += player["lostMatchesAmount"]
     return db_player
+
+def get_elo_of_tournament_players(name, groups):
+    if groups is None:
+        groups = api.get_tournament_data(name)["groups"]
+    player_id_elo_dict, _, _ = get_tournament_players(groups)
+    return player_id_elo_dict
 
 def main():
     # update_tournament_data("star-wars-legion-wq-at-pax-unplugged-2023")

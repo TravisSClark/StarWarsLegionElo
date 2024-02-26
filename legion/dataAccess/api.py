@@ -23,7 +23,7 @@ def get_tournament_data(name):
     while attempts < 3:
         response = requests.post(url=url, json=get_tournament_request_body, headers=headers)
         if response.status_code == 200:
-            return response.json()["data"]["tournament"]["groups"]
+            return response.json()["data"]["tournament"]
         else:
             attempts += 1
             
