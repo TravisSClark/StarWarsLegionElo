@@ -64,7 +64,7 @@ def get_all_sorted(sort_column):
         print("Error! Cannot get all players.")
         
 def get_player_info(id):
-    conn = create_connection(playerEloTableName)
+    conn = create_connection()
     
     if conn is not None:
         sql_select_player = f"SELECT * FROM {playerEloTableName} WHERE id={id}"
@@ -80,10 +80,10 @@ def get_player_info(id):
         print("Error! Cannot get player.")
 
 def insert_player(id, name, date):
-    conn = create_connection(playerEloTableName)
+    conn = create_connection()
     
     if conn is not None:
-        sql_insert_player = f"INSERT INTO {playerEloTableName} (id, name, date) VALUES(?,?,?)"
+        sql_insert_player = f"INSERT INTO {playerEloTableName} (id, name, change_date) VALUES(?,?,?)"
         cur = conn.cursor()
         cur.execute(sql_insert_player, (id, name, date))
         conn.commit()
@@ -93,13 +93,27 @@ def insert_player(id, name, date):
         print("Error! Cannot insert new player.")
     
 def update_player(player):
-    conn = create_connection(playerEloTableName)
+    conn = create_connection()
     
     if conn is not None:
-        sql_update_player = f""" UPDATE {playerEloTableName} SET name = ? , elo = ? , weighted_elo = ? ,games = ? , wins = ? , loses = ?
+        sql_update_player = f""" UPDATE {playerEloTableName} SET name = ? , elo = ? , weighted_elo = ? ,games = ? , wins = ? , loses = ? , change = ? , change_date = ?
         WHERE id = ?"""
         cur = conn.cursor()
-        cur.execute(sql_update_player, (player["name"], player["elo"], player["weighted_elo"], player["games"], player["wins"], player["loses"], player["id"]))
+        cur.execute(sql_update_player, (player["name"], player["elo"], player["weighted_elo"], player["games"], player["wins"], player["loses"], player["change"], player["change_date"], player["id"]))
+        conn.commit()
+        cur.close()
+        conn.close()
+    else:
+        print("Error! Cannot update player.")
+        
+def bulk_update_players(players):
+    conn = create_connection()
+    
+    if conn is not None:
+        sql_update_player = f""" UPDATE {playerEloTableName} SET name = ? , elo = ? , weighted_elo = ? , games = ? , wins = ? , loses = ? , change = ? , change_date = ?
+        WHERE id = ?"""
+        cur = conn.cursor()
+        cur.executemany(sql_update_player, [(player["name"], player["elo"], player["weighted_elo"], player["games"], player["wins"], player["loses"], player["change"], player["change_date"], player["id"]) for player in players])
         conn.commit()
         cur.close()
         conn.close()
