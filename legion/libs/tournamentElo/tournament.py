@@ -34,8 +34,10 @@ def update_tournament_data(name):
                         player_elo_dict[player_one_id]["weighted_elo"], player_elo_dict[player_two_id]["weighted_elo"], player_one_winner)
     for player in player_list:
         player["elo"] = player_elo_dict[player["id"]]["elo"]
+        player["change"] = player_elo_dict[player["id"]]["elo"] - player_elo_dict[player["id"]]["starting_elo"]
+        player["change_date"] = tournament_date
         player["weighted_elo"] = player_elo_dict[player["id"]]["weighted_elo"]
-        player["games"] = player_elo_dict[player["id"]]["wins"]
+        player["games"] = player_elo_dict[player["id"]]["games"]
         player["wins"] = player_elo_dict[player["id"]]["wins"]
         player["loses"] = player_elo_dict[player["id"]]["loses"]
         # tournament_list = json.loads(player["tournaments"])
@@ -55,28 +57,30 @@ def get_tournament_players(groups):
                     new_player_list.append(player)
                 else:
                     db_player["name"] = player["player"]["user"]["name"]
-                    player_list.append(db_player)
-                    player_id_elo_dict[db_player["id"]] = {}
-                    player_id_elo_dict[db_player["id"]]["name"] = player["player"]["user"]["name"]
-                    player_id_elo_dict[db_player["id"]]["elo"] = db_player["elo"]
-                    player_id_elo_dict[db_player["id"]]["weighted_elo"] = db_player["weighted_elo"]
-                    player_id_elo_dict[db_player["id"]]["games"] = db_player["games"]
-                    player_id_elo_dict[db_player["id"]]["wins"] = db_player["wins"]
-                    player_id_elo_dict[db_player["id"]]["loses"] = db_player["loses"]
+                    player_id_elo_dict, player_list = initialize_elo_dict_and_list(player, db_player, player_id_elo_dict, player_list)
     return player_id_elo_dict, player_list, new_player_list
 
+# Could probably remove duplicate codde from get tournament_players
 def insert_new_players(new_player_list, tournament_date):
     player_list = []
     player_id_elo_dict = {}
-    for player_item in new_player_list:
-        player = player_item["player"]["user"]
-        eloDb.insert_player(player["id"], player["name"], tournament_date)
-        db_player = eloDb.get_player_info(int(player["id"]))
-        player_id_elo_dict[db_player["id"]] = {}
-        player_id_elo_dict[db_player["id"]]["name"] = player["name"]
-        player_id_elo_dict[db_player["id"]]["elo"] = db_player["elo"]
-        player_id_elo_dict[db_player["id"]]["weighted_elo"] = db_player["weighted_elo"]
-    return player_list, player_id_elo_dict
+    for player in new_player_list:
+        eloDb.insert_player(player["player"]["user"]["id"], player["player"]["user"]["name"], tournament_date)
+        db_player = eloDb.get_player_info(int(player["player"]["user"]["id"]))
+        player_id_elo_dict, player_list = initialize_elo_dict_and_list(player, db_player, player_id_elo_dict, player_list)
+    return player_id_elo_dict, player_list
+
+def initialize_elo_dict_and_list(player, db_player, player_id_elo_dict, player_list):
+    player_list.append(db_player)
+    player_id_elo_dict[db_player["id"]] = {}
+    player_id_elo_dict[db_player["id"]]["name"] = player["player"]["user"]["name"]
+    player_id_elo_dict[db_player["id"]]["elo"] = db_player["elo"]
+    player_id_elo_dict[db_player["id"]]["starting_elo"] = db_player["elo"]
+    player_id_elo_dict[db_player["id"]]["weighted_elo"] = db_player["weighted_elo"]
+    player_id_elo_dict[db_player["id"]]["games"] = db_player["games"]
+    player_id_elo_dict[db_player["id"]]["wins"] = db_player["wins"]
+    player_id_elo_dict[db_player["id"]]["loses"] = db_player["loses"]
+    return player_id_elo_dict, player_list
     
 def get_game_results(player_elo_dict, players):
     for player in players:
@@ -111,8 +115,9 @@ def get_elo_of_tournament_players(name, groups):
 
 def main():
     # update_tournament_data("star-wars-legion-wq-at-pax-unplugged-2023")
-    update_tournament_data("atomic-empire-star-wars-legion-tournament-darkness-descends")
-    player_list = get_elo_of_tournament_players("cherokee-open-2024", None)
+    # update_tournament_data("atomic-empire-star-wars-legion-tournament-darkness-descends")
+    # update_tournament_data("cherokee-open-2024")
+    player_list = get_elo_of_tournament_players("atomic-empire-star-wars-legion-tournament-darkness-descends", None)
     sorted_player_list = sorted(player_list, key=lambda i: i["elo"], reverse=True)
     print(sorted_player_list)
     
