@@ -1,9 +1,10 @@
 # external
 import json
-
-# internal
 import sys
 import os
+from datetime import datetime
+
+# internal
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from dataAccess import api, eloDb
 from util import elo
@@ -11,7 +12,9 @@ from util import elo
 def update_tournament_data(name):
     tournament_data = api.get_tournament_data(name)
     groups = tournament_data["groups"]
-    tournament_date = tournament_data["endsAt"]
+    date_format = '%Y-%m-%d %H:%M:%S'
+    new_date_format = '%Y%m%d'
+    tournament_date = int(datetime.strptime(tournament_data["endsAt"], date_format).strftime(new_date_format))
     player_elo_dict, player_list, new_player_list = get_tournament_players(groups)
     # Retry logic basically
     if len(new_player_list) > 0:
@@ -115,8 +118,8 @@ def get_elo_of_tournament_players(name, groups):
 
 def main():
     # update_tournament_data("star-wars-legion-wq-at-pax-unplugged-2023")
-    # update_tournament_data("atomic-empire-star-wars-legion-tournament-darkness-descends")
-    # update_tournament_data("cherokee-open-2024")
+    update_tournament_data("atomic-empire-star-wars-legion-tournament-darkness-descends")
+    update_tournament_data("cherokee-open-2024")
     player_list = get_elo_of_tournament_players("atomic-empire-star-wars-legion-tournament-darkness-descends", None)
     sorted_player_list = sorted(player_list, key=lambda i: i["elo"], reverse=True)
     print(sorted_player_list)

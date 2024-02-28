@@ -2,6 +2,7 @@
 import tournamentsService
 import sys
 import os
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import legion.dataAccess.eloDb as eloDb
 import libs.tournamentElo.tournament as tournament
