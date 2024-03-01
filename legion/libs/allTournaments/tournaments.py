@@ -4,8 +4,9 @@ import sys
 import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-import legion.dataAccess.eloDb as eloDb
-import libs.tournamentElo.tournament as tournament
+import dataAccess.eloDb as eloDb
+import libs.tournament as tournament
+import util.automation as automation
 
 # external
 import json
@@ -13,10 +14,15 @@ import json
 def update_elos(start_date, end_date):
     tournaments = tournamentsService.get_all_tournaments(start_date, end_date)
     for tournament_name in tournaments:
-        tournament.update_tournament_data(tournament_name)
+        _, tournament_date = tournament.update_tournament_data(tournament_name)
+        automation.decay_elo(tournament_date)
+        
+def get_all():
+    players = eloDb.get_all()
+    return players
         
 def main():
-    # update_elos("2022-11-01 12:00:00", "2024-02-20 01:00:00")
+    update_elos("2022-11-01 12:00:00", "2024-02-26 01:00:00")
     # update_elos("2023-12-04 01:00:00", "2024-02-20 01:00:00")
     players = eloDb.get_all()
     weightedPlayers = eloDb.get_all_sorted("weighted_elo")
@@ -34,6 +40,5 @@ def main():
             file.write(",\n")
         file.write("{}\n]")
         
-
 if __name__ == '__main__':
     main()

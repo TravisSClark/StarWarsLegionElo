@@ -35,8 +35,9 @@ def calculate_faction_win_rate(name, include_mirrored, groups):
         faction_win_dict[faction]["Winrate"] = round(win_rate,2)
     return dict(sorted(faction_win_dict.items(), key=lambda item: item[1]["Winrate"], reverse=True))
 
-def get_tournament_lists(name):
-    groups = api.get_tournament_data(name)["groups"]
+def get_tournament_lists(name, groups):
+    if not groups:
+        groups = api.get_tournament_data(name)["groups"]
     player_id_list = []
     for group in groups:
         for player in group["players"]:
@@ -44,8 +45,8 @@ def get_tournament_lists(name):
     api_list_data = api.get_tournament_lists(player_id_list)
     return api_list_data.json()["data"]["legionLists"]
 
-def tournament_lists_analysis(name):
-    tournament_lists = get_tournament_lists(name)
+def tournament_lists_analysis(name, groups):
+    tournament_lists = get_tournament_lists(name, groups)
     objective_card_dict = {}
     deployment_card_dict = {}
     condition_card_dict = {}
